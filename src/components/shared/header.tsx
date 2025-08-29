@@ -5,15 +5,18 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
+import useAuth from '@/hooks/use-auth';
+
+import { userIsAuthenticated } from '@/core/auth';
 import { cn } from '@/lib/utils';
 
 import { Button } from '@/components/ui/button';
 import { BookOpen, LogOut, PenTool } from 'lucide-react';
 
 const Header = () => {
-  const isAuthenticated = false;
-
-  const pathname = usePathname()
+  const isAuthenticated = userIsAuthenticated();
+  const { logout } = useAuth()
+  const pathname = usePathname();
 
   const isActive = (path: string) => pathname.includes(path)
 
@@ -52,7 +55,7 @@ const Header = () => {
                 </Button>
               </Link>
 
-              <Button variant="ghost" size="sm" onClick={() => { alert("logout done!") }} className='hidden xs:block p-1'>
+              <Button variant="ghost" size="sm" onClick={logout} className='hidden xs:block p-1'>
                 <LogOut className="h-4 w-4" />
               </Button>
             </div>
