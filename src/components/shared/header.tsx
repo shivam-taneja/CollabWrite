@@ -3,7 +3,7 @@
 import React from 'react';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 import useAuth from '@/hooks/use-auth';
 
@@ -17,8 +17,15 @@ const Header = () => {
   const isAuthenticated = useIsAuthenticated();
   const { logout } = useAuth()
   const pathname = usePathname();
+  const router = useRouter()
 
-  const isActive = (path: string) => pathname.includes(path)
+  const isActive = (path: string) => pathname.includes(path);
+
+  const handleLogOut = async () => {
+    await logout()
+
+    router.replace('/')
+  }
 
   return (
     <header className='sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60'>
@@ -55,7 +62,7 @@ const Header = () => {
                 </Button>
               </Link>
 
-              <Button variant="ghost" size="sm" onClick={logout} className='hidden xs:block p-1'>
+              <Button variant="ghost" size="sm" onClick={handleLogOut} className='hidden xs:block p-1'>
                 <LogOut className="h-4 w-4" />
               </Button>
             </div>
