@@ -28,8 +28,8 @@ const AuthForm = ({ mode }: AuthFormProps) => {
   const form = useForm<LoginFormData | SignupFormData>({
     resolver: zodResolver(mode === 'login' ? loginSchema : signupSchema),
     defaultValues: {
+      ...(mode === 'signup' && { name: '' }),
       email: '',
-      name: '',
       password: ''
     },
     mode: 'all'
