@@ -18,7 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { BookOpen } from 'lucide-react';
+import { BookOpen, Loader2 } from 'lucide-react';
 import { FaGithub } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 
@@ -42,12 +42,6 @@ const AuthForm = ({ mode }: AuthFormProps) => {
     },
     mode: 'all'
   });
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = form;
 
   const onSubmit = async (data: LoginFormData | SignupFormData) => {
     setIsLoading(true);
@@ -125,7 +119,7 @@ const AuthForm = ({ mode }: AuthFormProps) => {
               )}
 
               <Form {...form}>
-                <form onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
+                <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
                   {mode === 'signup' &&
                     <FormField
                       control={form.control}
@@ -191,15 +185,11 @@ const AuthForm = ({ mode }: AuthFormProps) => {
                     className="w-full"
                     disabled={isLoading}
                   >
+                    {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+
                     {mode === 'login'
-                      ? (
-                        <>
-                          {isLoading ? 'Logging in...' : 'Log In'}
-                        </>
-                      )
-                      : <>
-                        {isLoading ? 'Creating account...' : 'Create Account'}
-                      </>}
+                      ? isLoading ? 'Logging in...' : 'Log In'
+                      : isLoading ? 'Creating account...' : 'Create Account'}
                   </Button>
                 </form>
               </Form>
