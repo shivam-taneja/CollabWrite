@@ -1,6 +1,7 @@
-import { Metadata } from 'next'
+import { Metadata } from 'next';
 
-import { defaultMetadata } from '@/utils/metadata'
+import AuthClientLayout from '@/components/auth/auth-client-layout';
+import { defaultMetadata } from '@/utils/metadata';
 
 export const metadata: Metadata = {
   ...defaultMetadata,
@@ -8,11 +9,7 @@ export const metadata: Metadata = {
 }
 
 const AuthLayout = ({ children }: { children: React.ReactNode }) => {
-  return (
-    <section className='bg-gradient-auth min-h-screen justify-center items-center flex'>
-      {children}
-    </section>
-  )
+  return <AuthClientLayout>{children}</AuthClientLayout>
 }
 
 export default AuthLayout
