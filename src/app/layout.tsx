@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 
 import { defaultMetadata } from "@/utils/metadata";
 
+import Footer from "@/components/shared/footer";
 import Header from "@/components/shared/header";
 import "./globals.css";
 
@@ -25,6 +26,7 @@ export default function RootLayout({
       <body className={`${inter.variable} antialiased min-h-screen bg-background`}>
         <Header />
         {children}
+        <Footer />
       </body>
     </html>
   );
