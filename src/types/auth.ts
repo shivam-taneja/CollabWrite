@@ -14,3 +14,9 @@ export interface AuthState {
     logout: () => void;
   }
 }
+
+export interface AuthResult {
+  success: boolean;
+  error?: string;
+  requiresVerification?: boolean;
+}

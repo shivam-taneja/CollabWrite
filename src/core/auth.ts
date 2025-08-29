@@ -68,7 +68,7 @@ const useAuthStore = create<AuthState>()(
   )
 );
 
-export const userDetails = () => useAuthStore((state) => state.user)
-export const isAuthenticated = () => useAuthStore((state) => state.isAuthenticated)
+export const userUserDetails = () => useAuthStore((state) => state.user)
+export const userIsAuthenticated = () => useAuthStore((state) => state.isAuthenticated)
 
 export const useAuthActions = () => useAuthStore((state) => state.actions);
