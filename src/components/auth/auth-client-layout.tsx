@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-import { userIsAuthenticated } from "@/core/auth";
+import { useIsAuthenticated } from "@/core/auth";
 
 import Loading from "@/components/shared/loading";
 
@@ -13,7 +13,7 @@ export default function AuthClientLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const isAuthenticated = userIsAuthenticated();
+  const isAuthenticated = useIsAuthenticated();
 
   useEffect(() => {
     if (isAuthenticated) {

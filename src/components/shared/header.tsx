@@ -7,14 +7,14 @@ import { usePathname } from 'next/navigation';
 
 import useAuth from '@/hooks/use-auth';
 
-import { userIsAuthenticated } from '@/core/auth';
+import { useIsAuthenticated } from '@/core/auth';
 import { cn } from '@/lib/utils';
 
 import { Button } from '@/components/ui/button';
 import { BookOpen, LogOut, PenTool } from 'lucide-react';
 
 const Header = () => {
-  const isAuthenticated = userIsAuthenticated();
+  const isAuthenticated = useIsAuthenticated();
   const { logout } = useAuth()
   const pathname = usePathname();
 
