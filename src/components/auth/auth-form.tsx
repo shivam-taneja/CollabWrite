@@ -69,7 +69,6 @@ const AuthForm = ({ mode }: AuthFormProps) => {
 
   return (
     <div className='w-full px-3 justify-center items-center flex'>
-      {/* Logo */}
       <div className='w-full max-w-md space-y-6 '>
         <div className="text-center space-y-2 ">
           <Link href="/" className="inline-flex items-center space-x-2">
@@ -195,7 +194,6 @@ const AuthForm = ({ mode }: AuthFormProps) => {
           </CardHeader>
         </Card>
 
-        {/* Sign Up Link */}
         <div className="text-center">
           <p className="text-sm text-muted-foreground">
             {mode === 'login'

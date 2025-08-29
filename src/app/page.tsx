@@ -11,7 +11,6 @@ export default function Home() {
 
   return (
     <main>
-      {/* Hero Section */}
       <section className="relative py-20 px-4 sm:py-32 hero-gradient">
         <div className="container mx-auto text-center">
           <div className="max-w-4xl mx-auto space-y-6">
@@ -42,7 +41,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Features Section */}
       <section className="py-20 px-4">
         <div className="container mx-auto">
           <div className="text-center mb-16">
@@ -89,7 +87,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Featured Posts */}
       <section className="py-20 px-4 bg-muted/30">
         <div className="container mx-auto">
           <div className="flex items-center justify-between mb-12">
