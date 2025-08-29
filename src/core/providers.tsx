@@ -9,7 +9,7 @@ import Header from "@/components/shared/header";
 
 const Providers = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
-  const isAuthRoute = pathname?.startsWith("/auth");
+  const isAuthRoute = pathname === '/auth/login' || pathname === '/auth/signup';
 
   return (
     <>
