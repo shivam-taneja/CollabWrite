@@ -15,10 +15,7 @@ export interface AuthState {
   }
 }
 
-export interface AuthResult {
-  $id: string,
-  name: string,
-  email: string,
+export interface AuthResult extends AuthUser {
   requiresVerification?: boolean;
 }
 

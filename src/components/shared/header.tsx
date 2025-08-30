@@ -5,8 +5,8 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 
-
-import { useIsAuthenticated } from '@/core/auth';
+import { useAuthActions, useIsAuthenticated } from '@/core/auth';
+import { account } from '@/lib/appwrite-client';
 import { cn } from '@/lib/utils';
 
 import { Button } from '@/components/ui/button';
@@ -17,16 +17,21 @@ const Header = () => {
   const isAuthenticated = useIsAuthenticated();
   const pathname = usePathname();
   const router = useRouter()
+  const { logout: logoutStore } = useAuthActions();
 
   const isActive = (path: string) => pathname.includes(path);
 
   const handleLogOut = async () => {
-    // await toast.promise(logout(),
-    //   {
-    //     pending: 'Logging out...',
-    //     success: 'Logout Successful'
-    //   }
-    // )
+    await toast.promise(async () => {
+      await account.deleteSession('current');
+      logoutStore();
+    },
+      {
+        pending: 'Logging out...',
+        success: 'Logout Successful',
+        error: 'Logout Failed!'
+      }
+    ).then().catch()
 
     router.replace('/')
   }

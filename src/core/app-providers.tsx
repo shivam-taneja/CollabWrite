@@ -2,9 +2,12 @@
 
 import { usePathname } from 'next/navigation';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+import { account } from '@/lib/appwrite-client';
+import { useAuthActions } from './auth';
 
 import Footer from "@/components/shared/footer";
 import Header from "@/components/shared/header";
@@ -17,6 +20,22 @@ export const queryClient = new QueryClient();
 const AppProviders = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
   const isAuthRoute = authRoutes.includes(pathname);
+  const { setUser, logout } = useAuthActions()
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const user = await account.get();
+        setUser({
+          $id: user.$id,
+          name: user.name,
+          email: user.email,
+        });
+      } catch {
+        logout()
+      }
+    })();
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

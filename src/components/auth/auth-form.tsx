@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react';
+import React, { useState } from 'react';
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -18,6 +18,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { account } from '@/lib/appwrite-client';
+import { OAuthProvider } from 'appwrite';
 import { BookOpen, Loader2 } from 'lucide-react';
 import { FaGithub } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
@@ -25,10 +27,14 @@ import { FcGoogle } from "react-icons/fc";
 const AuthForm = ({ mode }: AuthFormProps) => {
   const router = useRouter();
   const {
-    isPending: isLoading,
+    isPending,
     mutateAsync,
     error,
   } = useAuth(mode)
+
+  const [isOAuthLoading, setIsOAuthLoading] = useState<null | OAuthProvider>(null);
+
+  const isLoading = isPending || !!isOAuthLoading;
 
   const form = useForm<LoginFormData | SignupFormData>({
     resolver: zodResolver(mode === 'login' ? loginSchema : signupSchema),
@@ -57,6 +63,19 @@ const AuthForm = ({ mode }: AuthFormProps) => {
       form.reset();
     }
   };
+
+  const loginWithProvider = async (provider: OAuthProvider) => {
+    try {
+      setIsOAuthLoading(provider);
+
+      const successUrl = `${process.env.NEXT_PUBLIC_APP_URL}/feed`;
+      const failureUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth?error=oauth_failed`;
+
+      account.createOAuth2Session(provider, successUrl, failureUrl);
+    } catch (error) {
+      setIsOAuthLoading(null);
+    }
+  }
 
   return (
     <div className='w-full px-3 justify-center items-center flex'>
@@ -171,11 +190,11 @@ const AuthForm = ({ mode }: AuthFormProps) => {
                     className="w-full"
                     disabled={isLoading}
                   >
-                    {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+                    {isPending && <Loader2 className="w-4 h-4 animate-spin" />}
 
                     {mode === 'login'
-                      ? isLoading ? 'Logging in...' : 'Log In'
-                      : isLoading ? 'Creating account...' : 'Create Account'}
+                      ? isPending ? 'Logging in...' : 'Log In'
+                      : isPending ? 'Creating account...' : 'Create Account'}
                   </Button>
                 </form>
               </Form>
@@ -187,22 +206,40 @@ const AuthForm = ({ mode }: AuthFormProps) => {
               </div>
 
               <div className='flex gap-2 flex-col'>
-                <Button disabled={isLoading} variant={'outline'}>
-                  <FcGoogle />
-                  <span>
-                    {mode === 'login'
-                      ? "Log In with Google"
-                      : "Sign Up with Google"}
-                  </span>
+                <Button disabled={isLoading} variant={'outline'} onClick={() => loginWithProvider(OAuthProvider.Google)}>
+                  {isOAuthLoading === 'google' ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                      <span>Continuing with Google...</span>
+                    </>
+                  ) : (
+                    <>
+                      <FcGoogle />
+                      <span>
+                        {mode === 'login'
+                          ? "Log In with Google"
+                          : "Sign Up with Google"}
+                      </span>
+                    </>
+                  )}
                 </Button>
 
-                <Button disabled={isLoading} variant={'outline'}>
-                  <FaGithub />
-                  <span>
-                    {mode === 'login'
-                      ? "Log In with GitHub"
-                      : "Sign Up with GitHub"}
-                  </span>
+                <Button disabled={isLoading} variant={'outline'} onClick={() => loginWithProvider(OAuthProvider.Github)}>
+                  {isOAuthLoading === 'github' ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                      <span>Continuing with GitHub...</span>
+                    </>
+                  ) : (
+                    <>
+                      <FaGithub />
+                      <span>
+                        {mode === 'login'
+                          ? "Log In with GitHub"
+                          : "Sign Up with GitHub"}
+                      </span>
+                    </>
+                  )}
                 </Button>
               </div>
             </CardContent>
