@@ -27,7 +27,7 @@ const AuthForm = ({ mode }: AuthFormProps) => {
   const {
     isPending: isLoading,
     mutateAsync,
-    error
+    error,
   } = useAuth(mode)
 
   const form = useForm<LoginFormData | SignupFormData>({
@@ -43,14 +43,15 @@ const AuthForm = ({ mode }: AuthFormProps) => {
   const onSubmit = async (data: LoginFormData | SignupFormData) => {
     try {
       const result = await mutateAsync(data)
+
       if (result.success) {
         if (result.data?.requiresVerification) {
           // TODO: add toast later saying need to verify
-        } else {
-          router.push("/feed");
         }
+
+        router.push("/feed");
       }
-    } catch (error) {
+    } catch (err) {
 
     } finally {
       form.reset();

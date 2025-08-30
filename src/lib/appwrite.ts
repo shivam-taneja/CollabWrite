@@ -1,4 +1,4 @@
-import { Client, Account, Databases } from "node-appwrite";
+import { Account, Client, Databases } from "node-appwrite";
 
 let client: Client | null = null;
 

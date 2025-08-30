@@ -16,6 +16,9 @@ export interface AuthState {
 }
 
 export interface AuthResult {
+  $id: string,
+  name: string,
+  email: string,
   requiresVerification?: boolean;
 }
 
