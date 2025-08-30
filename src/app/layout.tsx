@@ -3,7 +3,7 @@ import { Inter } from "next/font/google";
 
 import { defaultMetadata } from "@/utils/metadata";
 
-import Providers from "@/core/providers";
+import AppProviders from "@/core/app-providers";
 import "./globals.css";
 
 const inter = Inter({
@@ -23,9 +23,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.variable} antialiased min-h-screen bg-background`}>
-        <Providers>
+        <AppProviders>
           {children}
-        </Providers>
+        </AppProviders>
       </body>
     </html>
   );
