@@ -57,9 +57,7 @@ const AuthForm = ({ mode }: AuthFormProps) => {
 
         router.push("/feed");
       }
-    } catch (err) {
-
-    } finally {
+    } catch (err) { } finally {
       form.reset();
     }
   };
