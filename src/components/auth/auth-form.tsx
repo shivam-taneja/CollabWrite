@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react';
+import React from 'react';
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -9,9 +9,9 @@ import { LoginFormData, loginSchema, SignupFormData, signupSchema } from '@/sche
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 
-import useAuth from '@/hooks/use-auth';
+import { useAuth } from '@/hooks/api/auth/use-auth';
 
-import { AuthResult } from '@/types/auth';
+import { AuthFormProps } from '@/types/auth';
 
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -22,16 +22,13 @@ import { BookOpen, Loader2 } from 'lucide-react';
 import { FaGithub } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 
-interface AuthFormProps {
-  mode: 'login' | 'signup';
-}
-
 const AuthForm = ({ mode }: AuthFormProps) => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-
-  const authService = useAuth();
-  const router = useRouter()
+  const router = useRouter();
+  const {
+    isPending: isLoading,
+    mutateAsync,
+    error
+  } = useAuth(mode)
 
   const form = useForm<LoginFormData | SignupFormData>({
     resolver: zodResolver(mode === 'login' ? loginSchema : signupSchema),
@@ -44,36 +41,19 @@ const AuthForm = ({ mode }: AuthFormProps) => {
   });
 
   const onSubmit = async (data: LoginFormData | SignupFormData) => {
-    setIsLoading(true);
-    setError('');
-
     try {
-      let result;
-
-      if (mode === 'login') {
-        const { email, password } = data as LoginFormData;
-        result = await authService.login(email, password);
-      } else {
-        const { name, email, password } = data as SignupFormData;
-        result = await authService.signup(name!, email, password);
-      }
-
-      result = result as AuthResult
-
+      const result = await mutateAsync(data)
       if (result.success) {
-        if (result.requiresVerification) {
-          // TODO: add toast later saying need to verfiy
+        if (result.data?.requiresVerification) {
+          // TODO: add toast later saying need to verify
         } else {
-          router.push('/feed');
+          router.push("/feed");
         }
-      } else {
-        setError(result.error || 'Authentication failed');
       }
-    } catch (err) {
-      setError('An error occurred. Please try again.');
+    } catch (error) {
+
     } finally {
-      form.reset()
-      setIsLoading(false);
+      form.reset();
     }
   };
 
@@ -111,10 +91,15 @@ const AuthForm = ({ mode }: AuthFormProps) => {
                 : "Get started with your free CollabWrite account"}
             </CardDescription>
 
-            <CardContent>
+            <CardContent className='overflow-hidden'>
               {error && (
-                <Alert variant="destructive" className='my-2  '>
-                  <AlertDescription>{error}</AlertDescription>
+                <Alert variant="destructive" className='my-2 text-start'>
+                  <AlertDescription className='space-y-1'>
+                    <span className='text-center w-full'>Something went wrong!</span>
+                    <span className='break-all'>
+                      {error.message}
+                    </span>
+                  </AlertDescription>
                 </Alert>
               )}
 
