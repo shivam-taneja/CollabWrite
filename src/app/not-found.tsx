@@ -6,7 +6,7 @@ import React from 'react'
 import { defaultMetadata } from '@/utils/metadata'
 
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Home } from 'lucide-react'
+import { Home } from 'lucide-react'
 
 export const metadata: Metadata = {
   ...defaultMetadata,

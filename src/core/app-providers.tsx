@@ -9,6 +9,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { account } from '@/lib/appwrite-client';
 import { useAuthActions } from './auth';
 
+import NextTopLoader from 'nextjs-toploader';
+
 import Footer from "@/components/shared/footer";
 import Header from "@/components/shared/header";
 import { ToastContainer } from 'react-toastify';
@@ -39,6 +41,10 @@ const AppProviders = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <NextTopLoader
+        color='#000080'
+        height={4}
+      />
       <ToastContainer
         position="top-right"
         autoClose={3000}
