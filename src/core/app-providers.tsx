@@ -61,6 +61,7 @@ const AppProviders = ({ children }: { children: React.ReactNode }) => {
           fontWeight: 'bold',
           borderRadius: '12px',
         }}
+        className="p-4 sm:p-0"
       />
       {!isAuthRoute && <Header />}
       {children}

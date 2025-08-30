@@ -5,20 +5,28 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 
-import { useAuthActions, useIsAuthenticated } from '@/core/auth';
+import { useAuthActions, useIsAuthenticated, useUserDetails } from '@/core/auth';
 import { account } from '@/lib/appwrite-client';
 import { cn } from '@/lib/utils';
 
 import CreatePostModal from '@/components/post/create-post-modal';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { BookOpen, LogOut, PenTool } from 'lucide-react';
 import { toast } from 'react-toastify';
 
 const Header = () => {
   const isAuthenticated = useIsAuthenticated();
   const pathname = usePathname();
-  const router = useRouter()
+  const router = useRouter();
   const { logout: logoutStore } = useAuthActions();
+  const user = useUserDetails();
 
   const isActive = (path: string) => pathname.includes(path);
 
@@ -32,10 +40,10 @@ const Header = () => {
         success: 'Logout Successful',
         error: 'Logout Failed!'
       }
-    ).then().catch()
+    ).then().catch();
 
-    router.replace('/')
-  }
+    router.replace('/');
+  };
 
   return (
     <header className='sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60'>
@@ -66,15 +74,41 @@ const Header = () => {
           {isAuthenticated ? (
             <div className='space-x-2 flex items-center'>
               <CreatePostModal>
-                <Button variant="gradient" size="sm">
+                <Button variant="gradient" size="sm" className='xs:flex hidden'>
                   <PenTool className="h-4 w-4" />
                   Write
                 </Button>
               </CreatePostModal>
 
-              <Button variant="ghost" size="sm" onClick={handleLogOut} className='hidden xs:block p-1'>
-                <LogOut className="h-4 w-4" />
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Avatar className="h-8 w-8 cursor-pointer">
+                    <AvatarFallback>
+                      {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                    </AvatarFallback>
+                  </Avatar>
+                </DropdownMenuTrigger>
+
+                <DropdownMenuContent align="end" className='space-y-2 bg-white'>
+                  <DropdownMenuItem asChild>
+                    <CreatePostModal>
+                      <Button variant="gradient" size="sm" className='w-full flex xs:hidden'>
+                        <PenTool className="h-4 w-4" />
+                        Write
+                      </Button>
+                    </CreatePostModal>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem asChild>
+                    <Link href="/my-posts" className='cursor-pointer'>My Posts</Link>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem onClick={handleLogOut} className='cursor-pointer'>
+                    <LogOut className="h-4 w-4" />
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           ) : (
             <div className='space-x-2 flex items-center'>
@@ -89,7 +123,7 @@ const Header = () => {
         </div>
       </div>
     </header>
-  )
-}
+  );
+};
 
-export default Header
+export default Header;
