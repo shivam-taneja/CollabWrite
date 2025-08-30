@@ -52,7 +52,7 @@ const FeedPage = () => {
               {categories.map((category) => (
                 <Button
                   key={category}
-                  variant={selectedCategory === category ? 'default' : 'outline'}
+                  variant={selectedCategory === category ? 'gradient' : 'outline'}
                   size="sm"
                   onClick={() => setSelectedCategory(category as PostCategory | 'All')}
                   className="rounded-full"
