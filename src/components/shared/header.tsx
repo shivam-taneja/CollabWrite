@@ -9,6 +9,7 @@ import { useAuthActions, useIsAuthenticated } from '@/core/auth';
 import { account } from '@/lib/appwrite-client';
 import { cn } from '@/lib/utils';
 
+import CreatePostModal from '@/components/post/create-post-modal';
 import { Button } from '@/components/ui/button';
 import { BookOpen, LogOut, PenTool } from 'lucide-react';
 import { toast } from 'react-toastify';
@@ -64,12 +65,12 @@ const Header = () => {
         <div>
           {isAuthenticated ? (
             <div className='space-x-2 flex items-center'>
-              <Link href="/create">
+              <CreatePostModal>
                 <Button variant="gradient" size="sm">
                   <PenTool className="h-4 w-4" />
                   Write
                 </Button>
-              </Link>
+              </CreatePostModal>
 
               <Button variant="ghost" size="sm" onClick={handleLogOut} className='hidden xs:block p-1'>
                 <LogOut className="h-4 w-4" />

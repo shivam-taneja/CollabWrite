@@ -26,3 +26,11 @@ export interface User {
   name: string
   email: string
 }
+
+export type CreatePostInput = {
+  title: string;
+};
+
+export type CreatePostResult = {
+  $id: string;
+};

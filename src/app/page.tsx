@@ -3,6 +3,7 @@ import Link from "next/link";
 import { mockPosts } from "@/utils/constants";
 
 import PostCard from "@/components/home/post-card";
+import CreatePostModal from "@/components/post/create-post-modal";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, BookOpen, Users, Zap } from "lucide-react";
 
@@ -31,11 +32,12 @@ export default function Home() {
                   <ArrowRight className="h-5 w-5" />
                 </Button>
               </Link>
-              <Link href="/auth/signup">
+
+              <CreatePostModal>
                 <Button variant="outline" size="lg" className="w-full sm:w-auto">
                   Start Writing
                 </Button>
-              </Link>
+              </CreatePostModal>
             </div>
           </div>
         </div>

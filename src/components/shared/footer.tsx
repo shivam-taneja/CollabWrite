@@ -1,5 +1,6 @@
 import Link from 'next/link';
 
+import CreatePostModal from '@/components/post/create-post-modal';
 import { BookOpen } from 'lucide-react';
 
 export default function Footer() {
@@ -34,12 +35,11 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link
-                  href="/create"
-                  className="hover:text-primary transition-colors"
-                >
-                  Write a Post
-                </Link>
+                <CreatePostModal>
+                  <span className="hover:text-primary transition-colors cursor-pointer">
+                    Write a Post
+                  </span>
+                </CreatePostModal>
               </li>
               <li>
                 <Link
