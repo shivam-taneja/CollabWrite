@@ -20,11 +20,6 @@ const useAuthStore = create<AuthState>()(
             isAuthenticated: !!user,
           }),
 
-        setAuthenticated: (authenticated) =>
-          set({
-            isAuthenticated: authenticated,
-          }),
-
         logout: () =>
           set({
             user: null,

@@ -10,7 +10,6 @@ export interface AuthState {
 
   actions: {
     setUser: (user: AuthUser | null) => void;
-    setAuthenticated: (authenticated: boolean) => void;
     logout: () => void;
   }
 }

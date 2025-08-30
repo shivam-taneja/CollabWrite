@@ -68,8 +68,10 @@ const AuthForm = ({ mode }: AuthFormProps) => {
     try {
       setIsOAuthLoading(provider);
 
-      const successUrl = `${process.env.NEXT_PUBLIC_APP_URL}/feed`;
-      const failureUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth?error=oauth_failed`;
+      const successUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth`;
+      const failureUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth?error=${encodeURIComponent(
+        "OAuth login failed. Please try again."
+      )}`;
 
       account.createOAuth2Session(provider, successUrl, failureUrl);
     } catch (error) {
