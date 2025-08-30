@@ -16,7 +16,9 @@ export interface AuthState {
 }
 
 export interface AuthResult {
-  success: boolean;
-  error?: string;
   requiresVerification?: boolean;
+}
+
+export interface AuthFormProps {
+  mode: 'login' | 'signup';
 }
