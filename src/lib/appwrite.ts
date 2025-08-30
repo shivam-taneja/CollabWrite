@@ -1,14 +1,30 @@
-import { Client, Account, Databases } from "appwrite";
+import { Client, Account, Databases } from "node-appwrite";
 
-if (!process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT || !process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID) {
-  throw new Error("Missing Appwrite environment variables");
+let client: Client | null = null;
+
+function getClient() {
+  if (!client) {
+    if (
+      !process.env.APPWRITE_ENDPOINT ||
+      !process.env.APPWRITE_PROJECT_ID ||
+      !process.env.APPWRITE_API_KEY
+    ) {
+      throw new Error("Missing Appwrite environment variables");
+    }
+
+    client = new Client()
+      .setEndpoint(process.env.APPWRITE_ENDPOINT)
+      .setProject(process.env.APPWRITE_PROJECT_ID)
+      .setKey(process.env.APPWRITE_API_KEY);
+  }
+
+  return client;
 }
 
-const client = new Client()
-  .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT)
-  .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID);
+export function getAccount() {
+  return new Account(getClient());
+}
 
-const account = new Account(client);
-const databases = new Databases(client);
-
-export { client, account, databases };
+export function getDatabases() {
+  return new Databases(getClient());
+}
