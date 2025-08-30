@@ -5,24 +5,28 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 
-import useAuth from '@/hooks/use-auth';
 
 import { useIsAuthenticated } from '@/core/auth';
 import { cn } from '@/lib/utils';
 
 import { Button } from '@/components/ui/button';
 import { BookOpen, LogOut, PenTool } from 'lucide-react';
+import { toast } from 'react-toastify';
 
 const Header = () => {
   const isAuthenticated = useIsAuthenticated();
-  const { logout } = useAuth()
   const pathname = usePathname();
   const router = useRouter()
 
   const isActive = (path: string) => pathname.includes(path);
 
   const handleLogOut = async () => {
-    await logout()
+    // await toast.promise(logout(),
+    //   {
+    //     pending: 'Logging out...',
+    //     success: 'Logout Successful'
+    //   }
+    // )
 
     router.replace('/')
   }
