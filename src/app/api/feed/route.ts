@@ -89,7 +89,7 @@ export async function GET(req: Request) {
       });
     }
 
-    const total = enrichedPosts.length;
+    const total = posts.total;
     const page = Math.floor(offset / FEED_LIMIT) + 1;
     const totalPages = Math.ceil(total / FEED_LIMIT);
 

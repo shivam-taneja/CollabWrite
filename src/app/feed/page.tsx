@@ -194,28 +194,35 @@ const FeedPage = () => {
                       <PaginationContent>
                         <PaginationItem>
                           <PaginationPrevious
-                            onClick={() =>
-                              page > 1 && setParam('offset', (page - 2) * FEED_LIMIT)
-                            }
+                            onClick={() => page > 1 && setParam('offset', (page - 2) * FEED_LIMIT)}
+                            className={page === 1 ? "cursor-not-allowed opacity-50" : ""}
                           />
                         </PaginationItem>
 
-                        {Array.from({ length: totalPages }).map((_, i) => (
-                          <PaginationItem key={i}>
-                            <PaginationLink
-                              isActive={page === i + 1}
-                              onClick={() => setParam('offset', i * FEED_LIMIT)}
-                            >
-                              {i + 1}
-                            </PaginationLink>
-                          </PaginationItem>
-                        ))}
+                        {Array.from({ length: totalPages }).map((_, i) => {
+                          const isActive = page === i + 1;
+
+                          return (
+                            <PaginationItem key={i}>
+                              <PaginationLink
+                                isActive={isActive}
+                                onClick={() => setParam('offset', i * FEED_LIMIT)}
+                                className={
+                                  isActive
+                                    ? "bg-gradient-primary text-white hover:text-white"
+                                    : "hover:bg-muted "
+                                }
+                              >
+                                {i + 1}
+                              </PaginationLink>
+                            </PaginationItem>
+                          );
+                        })}
 
                         <PaginationItem>
                           <PaginationNext
-                            onClick={() =>
-                              page < totalPages && setParam('offset', page * FEED_LIMIT)
-                            }
+                            onClick={() => page < totalPages && setParam('offset', page * FEED_LIMIT)}
+                            className={page === totalPages ? "cursor-not-allowed opacity-50" : ""}
                           />
                         </PaginationItem>
                       </PaginationContent>
