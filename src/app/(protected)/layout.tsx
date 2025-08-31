@@ -31,7 +31,7 @@ const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
     return <Loading />;
 
   return (
-    <section className="min-h-screen">
+    <section>
       {children}
     </section>
   )
