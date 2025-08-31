@@ -21,7 +21,7 @@ export function useGetUserPosts({
       const jwt = await account.createJWT();
 
       const response = await api.get<ApiResponse<UserPosts>>({
-        entity: "user/posts",
+        entity: "post/my-posts",
         options: {
           headers: { Authorization: `Bearer ${jwt.jwt}` },
           params
