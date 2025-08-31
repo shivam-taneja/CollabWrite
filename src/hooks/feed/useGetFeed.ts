@@ -6,13 +6,20 @@ import { ApiResponse } from "@/core/api/types";
 import { FeedSearchFormT } from "@/schema/feed";
 import { FeedData } from "@/types/feed";
 
-export function useGetFeed({ params, queryOptions }: { params: FeedSearchFormT, queryOptions?: Partial<UseQueryOptions> }) {
+export function useGetFeed({ params, homepage = false, queryOptions }: { params?: FeedSearchFormT, homepage?: boolean, queryOptions?: Partial<UseQueryOptions> }) {
   return useQuery({
-    queryKey: ["feed", params],
+    queryKey: ["feed", homepage ? "homepage" : params],
     queryFn: async () => {
       const response = await api.get<ApiResponse<FeedData>>({
         entity: "feed",
-        options: { params },
+        options: {
+          params,
+          ...(homepage && {
+            headers: {
+              "x-homepage-request": "true"
+            }
+          }),
+        },
       });
 
       if (!response.success) {

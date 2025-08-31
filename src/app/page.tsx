@@ -1,15 +1,11 @@
 import Link from "next/link";
 
-import { mockPosts } from "@/utils/constants";
-
-import PostCard from "@/components/home/post-card";
+import LimitedPosts from "@/components/home/limited-posts";
 import CreatePostModal from "@/components/post/create-post-modal";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, BookOpen, Users, Zap } from "lucide-react";
 
 export default function Home() {
-  const featuredPosts = mockPosts.slice(0, 3)
-
   return (
     <main>
       <section className="relative py-20 px-4 sm:py-32 hero-gradient">
@@ -106,11 +102,7 @@ export default function Home() {
             </Link>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featuredPosts.map((post) => (
-              <PostCard key={post.id} post={post} />
-            ))}
-          </div>
+          <LimitedPosts />
         </div>
       </section>
     </main>

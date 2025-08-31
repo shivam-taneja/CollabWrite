@@ -14,6 +14,7 @@ import { FEED_LIMIT } from "@/utils/constants";
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
+    const homepageHeader = req.headers.get("x-homepage-request");
 
     const parsedDefaults = backendFeedSearchSchema.safeParse({
       search: searchParams.get('search') || undefined,
@@ -40,10 +41,12 @@ export async function GET(req: Request) {
     const tables = new TablesDB(client);
     const users = new Users(client);
 
+    const limit = homepageHeader === "true" ? 3 : FEED_LIMIT;
+
     const queries = [
       Query.equal("isPrivate", false),
       Query.select(["$id", "title", "summary", "category", "$createdAt", "postCollaborators.*"]),
-      Query.limit(FEED_LIMIT),
+      Query.limit(limit),
       Query.offset(offset),
     ];
 
