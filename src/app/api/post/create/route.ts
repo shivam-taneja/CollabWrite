@@ -59,7 +59,7 @@ export async function POST(req: Request) {
       {
         title,
         content: "",
-        summary: "",
+        summary: "This is default summary",
         category: "Other",
         isPrivate: true,
       },
