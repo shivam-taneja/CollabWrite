@@ -47,3 +47,5 @@ export const mockPosts: KnowledgePost[] = [
     updatedAt: new Date('2024-01-30')
   }
 ]
+
+export const FEED_LIMIT = 10
