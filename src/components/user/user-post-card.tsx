@@ -9,7 +9,7 @@ import { formatDistanceToNow } from 'date-fns';
 
 import { UserPostsSection } from '@/types/user';
 
-import EditPostTitleModal from '@/components/post/edit-post-title-modal';
+import EditPostModal from '@/components/post/edit-post-modal';
 import PostSettingsModal from '@/components/post/post-settings-modal';
 
 import { Badge } from '@/components/ui/badge';
@@ -45,89 +45,99 @@ const UserPostCard = ({
   const { $createdAt, $id, category, summary, title, isPrivate } = postDetails;
 
   return (
-    <Link href={`/post/${$id}`}>
-      <Card className="h-full card-hover cursor-pointer bg-gradient-card relative">
-        <CardHeader className="space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Badge className={categoryColors[category] || categoryColors.Other}>
-                {category}
+    <Card className="h-full card-hover bg-gradient-card relative">
+      <CardHeader className="space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Badge className={categoryColors[category] || categoryColors.Other}>
+              {category}
+            </Badge>
+
+            {isPrivate && (
+              <Badge
+                variant="secondary"
+                className="flex items-center gap-1"
+              >
+                <Lock className="h-3 w-3" />
+                Private
               </Badge>
-
-              {isPrivate && (
-                <Badge
-                  variant="secondary"
-                  className="flex items-center gap-1"
-                >
-                  <Lock className="h-3 w-3" />
-                  Private
-                </Badge>
-              )}
-            </div>
-
-            <div className="flex items-center gap-2">
-              <div className="flex items-center text-xs text-muted-foreground">
-                <Clock className="h-3 w-3 mr-1" />
-                {formatDistanceToNow(new Date($createdAt), { addSuffix: true })}
-              </div>
-
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                    <MoreVertical className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-
-                <DropdownMenuContent align="end" className="bg-white">
-                  <DropdownMenuItem
-                    onClick={() => setEditOpen(true)}
-                    className="cursor-pointer"
-                  >
-                    <Pencil className="mr-2 h-4 w-4" /> Edit Title
-                  </DropdownMenuItem>
-
-                  <DropdownMenuItem
-                    onClick={() => alert('Delete Post TODO')}
-                    className="cursor-pointer"
-                  >
-                    <Trash className="mr-2 h-4 w-4" /> Delete
-                  </DropdownMenuItem>
-
-                  <DropdownMenuItem
-                    onClick={() => setSettingsOpen(true)}
-                    className="cursor-pointer"
-                  >
-                    <Settings className="mr-2 h-4 w-4" /> Settings
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+            )}
           </div>
 
+          <div className="flex items-center gap-2">
+            <div className="flex items-center text-xs text-muted-foreground">
+              <Clock className="h-3 w-3 mr-1" />
+              {formatDistanceToNow(new Date($createdAt), { addSuffix: true })}
+            </div>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+
+              <DropdownMenuContent align="end" className="bg-white">
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setEditOpen(true)
+                  }}
+                  className="cursor-pointer"
+                >
+                  <Pencil className="mr-2 h-4 w-4" /> Edit Post
+                </DropdownMenuItem>
+
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    alert('Delete Post TODO')
+                  }}
+                  className="cursor-pointer"
+                >
+                  <Trash className="mr-2 h-4 w-4" /> Delete
+                </DropdownMenuItem>
+
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setSettingsOpen(true)
+                  }}
+                  className="cursor-pointer"
+                >
+                  <Settings className="mr-2 h-4 w-4" /> Settings
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+
+
+        <Link href={`/post/${$id}`}>
           <h3 className="font-semibold text-lg leading-tight line-clamp-2 text-card-foreground hover:underline">
             {title}
           </h3>
-        </CardHeader>
+        </Link>
+      </CardHeader>
 
-        <CardContent>
-          <p className="text-muted-foreground text-sm leading-relaxed line-clamp-3">
-            {summary}
-          </p>
-        </CardContent>
+      <CardContent>
+        <p className="text-muted-foreground text-sm leading-relaxed line-clamp-3">
+          {summary}
+        </p>
+      </CardContent>
 
-        <EditPostTitleModal
-          isOpen={editOpen}
-          onOpenChange={setEditOpen}
-          post={postDetails}
-        />
+      <EditPostModal
+        isOpen={editOpen}
+        onOpenChange={setEditOpen}
+        post={postDetails}
+      />
 
-        {/* <PostSettingsModal
+      {/* <PostSettingsModal
           isOpen={settingsOpen}
           onOpenChange={setSettingsOpen}
           post={postDetails}
         /> */}
-      </Card>
-    </Link>
+    </Card>
   );
 };
 
