@@ -1,12 +1,13 @@
-
 import { NextResponse } from "next/server";
+
 import { Client, Query, TablesDB, Users } from "node-appwrite";
 
-import { ApiResponse } from "@/core/api/types";
 import db from "@/lib/db";
 import { backendFeedSearchSchema } from "@/schema/feed";
 
-import { FeedData } from "@/types/feed";
+import { ApiResponse } from "@/core/api/types";
+import { FeedCollaborators, FeedData } from "@/types/feed";
+import { PostCollaboratorsRole, PostWithCollab } from "@/types/post";
 
 import { FEED_LIMIT } from "@/utils/constants";
 
@@ -57,28 +58,34 @@ export async function GET(req: Request) {
       ]));
     }
 
-    const posts = await tables.listRows(db.dbID, db.posts, queries);
+    const posts = await tables.listRows<PostWithCollab>(db.dbID, db.posts, queries);
 
-    const enrichedPosts = [];
+    const enrichedPosts: FeedData['rows'] = [];
     for (const post of posts.rows) {
-      const enrichedCollabs = [];
+      const collaborators = post.postCollaborators ?? [];
+      const owner = collaborators.find(c => c.role === "owner");
 
-      for (const collab of post.postCollaborators ?? []) {
+      let ownerName = "Unknown User";
+
+      if (owner) {
         try {
-          const user = await users.get(collab.userId);
-          enrichedCollabs.push({
-            ...collab,
-            name: user.name,
-            email: user.email,
-          });
+          const user = await users.get(owner.userId);
+          ownerName = user.name;
         } catch {
-          enrichedCollabs.push(collab); // fallback
+          ownerName = "Unknown User";
         }
       }
 
       enrichedPosts.push({
-        ...post,
-        postCollaborators: enrichedCollabs,
+        $id: post.$id,
+        title: post.title,
+        summary: post.summary,
+        $createdAt: post.$createdAt,
+        category: post.category,
+        postCollaborators: {
+          count: collaborators.length,
+          owner: ownerName
+        },
       });
     }
 

@@ -4,7 +4,6 @@ import { api } from "@/core/api";
 import { ApiResponse } from "@/core/api/types";
 
 import { FeedSearchFormT } from "@/schema/feed";
-
 import { FeedData } from "@/types/feed";
 
 export function useGetFeed({ params, queryOptions }: { params: FeedSearchFormT, queryOptions?: Partial<UseQueryOptions> }) {
