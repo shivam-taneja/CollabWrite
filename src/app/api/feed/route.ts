@@ -6,8 +6,8 @@ import db from "@/lib/db";
 import { backendFeedSearchSchema } from "@/schema/feed";
 
 import { ApiResponse } from "@/core/api/types";
-import { FeedCollaborators, FeedData } from "@/types/feed";
-import { PostCollaboratorsRole, PostWithCollab } from "@/types/post";
+import { FeedData } from "@/types/feed";
+import { PostWithCollab } from "@/types/post";
 
 import { FEED_LIMIT } from "@/utils/constants";
 
