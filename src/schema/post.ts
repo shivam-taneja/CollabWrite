@@ -5,3 +5,10 @@ export const createPostSchema = z.object({
 });
 
 export type CreatePostSchemaT = z.infer<typeof createPostSchema>
+
+export const updatePostSchema = createPostSchema.extend({
+  summary: z.string().min(10, "Summary must be at least 10 characters").optional(),
+  postId: z.string()
+});
+
+export type UpdatePostSchemaT = z.infer<typeof updatePostSchema>;

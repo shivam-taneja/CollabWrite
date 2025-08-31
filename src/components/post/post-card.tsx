@@ -1,35 +1,17 @@
-'use client';
-
-import React, { useState } from 'react';
+import React from 'react';
 
 import Link from 'next/link';
 
+import { categoryColors } from '@/utils/constants';
 import { formatDistanceToNow } from 'date-fns';
 
 import { FeedRow } from '@/types/feed';
-import { PostCategory } from '@/types/post';
-
-import EditPostTitleModal from '@/components/post/edit-post-title-modal';
-import PostSettingsModal from '@/components/post/post-settings-modal';
 
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Clock, MoreVertical, Pencil, Settings, Trash, User } from 'lucide-react';
+import { Clock, User } from 'lucide-react';
 
-const categoryColors: Record<PostCategory, string> = {
-  Tech: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
-  Life: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
-  Food: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300',
-  Health: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300',
-  Other: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300',
-}
-
-const PostCard = ({ postDetails, showActions = false }: { postDetails: FeedRow; showActions?: boolean }) => {
-  const [editOpen, setEditOpen] = useState(false);
-  const [settingsOpen, setSettingsOpen] = useState(false);
-
+const PostCard = ({ postDetails, }: { postDetails: FeedRow }) => {
   const { $createdAt, $id, category, postCollaborators, summary, title } = postDetails
 
   return (
@@ -46,30 +28,6 @@ const PostCard = ({ postDetails, showActions = false }: { postDetails: FeedRow; 
                 <Clock className="h-3 w-3 mr-1" />
                 {formatDistanceToNow($createdAt, { addSuffix: true })}
               </div>
-
-              {showActions && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                      <MoreVertical className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-
-                  <DropdownMenuContent align="end" className='bg-white'>
-                    <DropdownMenuItem onClick={() => setEditOpen(true)} className='cursor-pointer'>
-                      <Pencil className="mr-2 h-4 w-4" /> Edit Title
-                    </DropdownMenuItem>
-
-                    <DropdownMenuItem onClick={() => alert("Delete Post TODO")} className='cursor-pointer'>
-                      <Trash className="mr-2 h-4 w-4" /> Delete
-                    </DropdownMenuItem>
-
-                    <DropdownMenuItem onClick={() => setSettingsOpen(true)} className='cursor-pointer'>
-                      <Settings className="mr-2 h-4 w-4" /> Settings
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
             </div>
           </div>
 
@@ -93,9 +51,6 @@ const PostCard = ({ postDetails, showActions = false }: { postDetails: FeedRow; 
             )}
           </div>
         </CardFooter>
-
-        {/* <EditPostTitleModal isOpen={editOpen} onOpenChange={setEditOpen} post={post} />
-      <PostSettingsModal isOpen={settingsOpen} onOpenChange={setSettingsOpen} post={post} /> */}
       </Card>
     </Link>
   );
