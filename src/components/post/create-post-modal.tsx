@@ -1,12 +1,19 @@
 "use client";
 
-import { account, databases } from "@/lib/appwrite-client";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { ID, Permission, Role } from "appwrite";
-import { useRouter } from "next/navigation";
 import { ReactNode, useState } from "react";
+
+import { useRouter } from "next/navigation";
+
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
+import { useCreatePost } from "@/hooks/api/post/useCreatePosts";
+import { account } from "@/lib/appwrite-client";
+
+import { useAuthActions } from "@/core/auth";
+import { createPostSchema, CreatePostSchemaT } from "@/schema/post";
+
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -15,7 +22,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-
 import {
   Form,
   FormControl,
@@ -24,20 +30,11 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useAuthActions } from "@/core/auth";
-import { useCreatePost } from "@/hooks/api/post/use-create-post";
-import { startPostSchema, StartPostSchemaT } from "@/schema/post";
 import { Loader2 } from "lucide-react";
 import { toast } from "react-toastify";
 
-type CreatePostModalProps = {
-  children: ReactNode;
-};
-
-function CreatePostModal({ children }: CreatePostModalProps) {
+function CreatePostModal({ children }: { children: ReactNode }) {
   const { logout } = useAuthActions()
   const router = useRouter();
   const {
@@ -47,8 +44,8 @@ function CreatePostModal({ children }: CreatePostModalProps) {
 
   const [open, setOpen] = useState(false);
 
-  const form = useForm<StartPostSchemaT>({
-    resolver: zodResolver(startPostSchema),
+  const form = useForm<CreatePostSchemaT>({
+    resolver: zodResolver(createPostSchema),
     defaultValues: {
       title: ""
     },
@@ -70,17 +67,16 @@ function CreatePostModal({ children }: CreatePostModalProps) {
     }
   }
 
-  async function onSubmit(values: StartPostSchemaT) {
+  async function onSubmit(values: CreatePostSchemaT) {
     try {
-      const response = await toast.promise(
-        mutateAsync({ title: values.title }), {
-        error: 'Something went wrong!',
-      })
+      const response = await mutateAsync({ title: values.title })
 
       if (response.success && response.data) {
         router.push(`/post/${response.data.$id}`);
       }
-    } catch (err) { } finally {
+    } catch (err) {
+      toast.error("Someting went wrong!")
+    } finally {
       setOpen(false);
       form.reset();
     }
