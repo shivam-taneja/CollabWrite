@@ -4,6 +4,7 @@ import { Client, Query, TablesDB, Users } from "node-appwrite";
 
 import { ApiResponse } from "@/core/api/types";
 import db from "@/lib/db";
+import { backendFeedSearchSchema } from "@/schema/feed";
 
 import { FeedData } from "@/types/feed";
 
@@ -13,9 +14,22 @@ export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
 
-    const search = searchParams.get("search") || undefined;
-    const category = searchParams.get("category") || undefined;
-    const offset = Number(searchParams.get("offset")) || 0;
+    const parsedDefaults = backendFeedSearchSchema.safeParse({
+      search: searchParams.get('search') || undefined,
+      category: searchParams.get('category') || undefined,
+      offset: Number(searchParams.get('offset')),
+    });
+
+    if (!parsedDefaults.success) {
+      return NextResponse.json<ApiResponse>(
+        { success: false, error: `Invalid Search Params: ${parsedDefaults.error.message}` },
+        { status: 400 }
+      );
+    }
+
+    const search = parsedDefaults.data.search;
+    const category = parsedDefaults.data.category;
+    const offset = parsedDefaults.data.offset;
 
     const client = new Client()
       .setEndpoint(process.env.APPWRITE_ENDPOINT!)
@@ -37,8 +51,10 @@ export async function GET(req: Request) {
     }
 
     if (search) {
-      queries.push(Query.search("title", search));
-      queries.push(Query.search("summary", search));
+      queries.push(Query.or([
+        Query.search("title", search),
+        Query.search("summary", search),
+      ]));
     }
 
     const posts = await tables.listRows(db.dbID, db.posts, queries);

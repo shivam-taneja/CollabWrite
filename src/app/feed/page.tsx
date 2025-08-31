@@ -7,15 +7,16 @@ import React, { useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 
-import { useGetFeed } from '@/hooks/feed/use-get-feed';
+import { useGetFeed } from '@/hooks/feed/useGetFeed';
 import useDebounce from '@/hooks/use-debounce';
 
 import { FeedSearchFormT, feedSearchSchema } from '@/schema/feed';
 
-import { PostCategory } from '@/types/post';
+import { POST_CATEGORIES, PostCategory } from '@/types/post';
 
 import { FEED_LIMIT } from '@/utils/constants';
 
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -27,14 +28,6 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination';
 import { Loader2, Search } from 'lucide-react';
-
-export const POST_CATEGORIES: PostCategory[] = [
-  'Tech',
-  'Life',
-  'Food',
-  'Health',
-  'Other',
-];
 
 function cleanParams(params: FeedSearchFormT) {
   const newParams: Partial<FeedSearchFormT> = {};
@@ -52,18 +45,19 @@ const FeedPage = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const parsedDefaults = feedSearchSchema.parse({
+  const parsedDefaults = feedSearchSchema.safeParse({
     search: searchParams.get('search') || undefined,
-    category: searchParams.get('category') || undefined,
-    offset: Number(searchParams.get('offset')) || 0,
+    category: searchParams.get('category') || "All",
+    offset: Number(searchParams.get('offset')),
   });
+
+  const defaults = parsedDefaults.success
+    ? parsedDefaults.data
+    : { search: '', category: "All" as PostCategory, offset: 0 };
 
   const form = useForm<FeedSearchFormT>({
     resolver: zodResolver(feedSearchSchema),
-    defaultValues: {
-      category: 'All',
-      ...parsedDefaults,
-    },
+    defaultValues: defaults,
   });
 
   const { watch, register, setValue } = form;
@@ -82,6 +76,9 @@ const FeedPage = () => {
       category,
       offset,
     }),
+    queryOptions: {
+      enabled: parsedDefaults.success
+    }
   });
 
   const posts = data?.rows ?? [];
@@ -154,58 +151,76 @@ const FeedPage = () => {
           </div>
         ) : (
           <>
-            <div className="text-center text-muted-foreground">
-              {total} post{total !== 1 ? 's' : ''} found
-            </div>
-
-            {posts.length > 0 ? (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {/* TODO: Render post card here */}
+            {!parsedDefaults.success ? (
+              <div className='flex justify-center items-center w-full '>
+                <Alert variant="destructive" className='my-2 text-start max-w-md shadow-xl'>
+                  <AlertDescription className='space-y-1'>
+                    <span className='text-center w-full'>Invalid filters detected.</span>
+                    <span className='break-all text-center w-full'>
+                      Some search options are not valid.{" "}
+                      <span className='font-medium underline cursor-pointer' onClick={() => router.replace('/feed')}>
+                        reset
+                      </span>
+                    </span>
+                  </AlertDescription>
+                </Alert>
               </div>
             ) : (
-              <div className="text-center py-16">
-                <h3 className="text-xl font-semibold mb-2">No posts found</h3>
-                <p className="text-muted-foreground">
-                  Try adjusting your search terms or category filter
-                </p>
-              </div>
+              <>
+                <div className="text-center text-muted-foreground">
+                  {total} post{total !== 1 ? 's' : ''} found
+                </div>
+
+                {posts.length > 0 ? (
+                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {/* TODO: Render post card here */}
+                  </div>
+                ) : (
+                  <div className="text-center py-16">
+                    <h3 className="text-xl font-semibold mb-2">No posts found</h3>
+                    <p className="text-muted-foreground">
+                      Try adjusting your search terms or category filter
+                    </p>
+                  </div>
+                )}
+
+                {totalPages > 1 && (
+                  <div className="flex justify-center mt-8">
+                    <Pagination>
+                      <PaginationContent>
+                        <PaginationItem>
+                          <PaginationPrevious
+                            onClick={() =>
+                              page > 1 && setParam('offset', (page - 2) * FEED_LIMIT)
+                            }
+                          />
+                        </PaginationItem>
+
+                        {Array.from({ length: totalPages }).map((_, i) => (
+                          <PaginationItem key={i}>
+                            <PaginationLink
+                              isActive={page === i + 1}
+                              onClick={() => setParam('offset', i * FEED_LIMIT)}
+                            >
+                              {i + 1}
+                            </PaginationLink>
+                          </PaginationItem>
+                        ))}
+
+                        <PaginationItem>
+                          <PaginationNext
+                            onClick={() =>
+                              page < totalPages && setParam('offset', page * FEED_LIMIT)
+                            }
+                          />
+                        </PaginationItem>
+                      </PaginationContent>
+                    </Pagination>
+                  </div>
+                )}
+              </>
             )}
           </>
-        )}
-
-        {totalPages > 1 && (
-          <div className="flex justify-center mt-8">
-            <Pagination>
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious
-                    onClick={() =>
-                      page > 1 && setParam('offset', (page - 2) * FEED_LIMIT)
-                    }
-                  />
-                </PaginationItem>
-
-                {Array.from({ length: totalPages }).map((_, i) => (
-                  <PaginationItem key={i}>
-                    <PaginationLink
-                      isActive={page === i + 1}
-                      onClick={() => setParam('offset', i * FEED_LIMIT)}
-                    >
-                      {i + 1}
-                    </PaginationLink>
-                  </PaginationItem>
-                ))}
-
-                <PaginationItem>
-                  <PaginationNext
-                    onClick={() =>
-                      page < totalPages && setParam('offset', page * FEED_LIMIT)
-                    }
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
-          </div>
         )}
       </div>
     </div>
