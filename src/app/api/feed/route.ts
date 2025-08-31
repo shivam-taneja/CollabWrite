@@ -40,9 +40,9 @@ export async function GET(req: Request) {
     const tables = new TablesDB(client);
     const users = new Users(client);
 
-    const queries: any[] = [
+    const queries = [
       Query.equal("isPrivate", false),
-      Query.select(["*", "postCollaborators.*"]),
+      Query.select(["$id", "title", "summary", "category", "$createdAt", "postCollaborators.*"]),
       Query.limit(FEED_LIMIT),
       Query.offset(offset),
     ];
