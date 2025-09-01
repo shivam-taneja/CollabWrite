@@ -64,7 +64,7 @@ const UpdatePostModal = ({
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+    <Dialog open={isOpen} onOpenChange={() => { !isPending && onOpenChange }}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Edit Post</DialogTitle>

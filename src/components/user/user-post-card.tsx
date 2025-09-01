@@ -57,15 +57,13 @@ const UserPostCard = ({
               {category}
             </Badge>
 
-            {isPrivate && (
-              <Badge
-                variant="secondary"
-                className="flex items-center gap-1"
-              >
-                <Lock className="h-3 w-3" />
-                Private
-              </Badge>
-            )}
+            <Badge
+              variant="secondary"
+              className="flex items-center gap-1"
+            >
+              <Lock className="h-3 w-3" />
+              {isPrivate ? "Private" : "Public"}
+            </Badge>
           </div>
 
           <div className="flex items-center gap-2">
@@ -138,11 +136,11 @@ const UserPostCard = ({
         post={postDetails}
       />
 
-      {/* <PostSettingsModal
-          isOpen={settingsOpen}
-          onOpenChange={setSettingsOpen}
-          post={postDetails}
-        /> */}
+      <PostSettingsModal
+        isOpen={settingsOpen}
+        onOpenChange={setSettingsOpen}
+        post={postDetails}
+      />
     </Card>
   );
 };

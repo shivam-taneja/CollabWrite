@@ -5,10 +5,13 @@ export const createPostSchema = z.object({
 });
 export type CreatePostSchemaT = z.infer<typeof createPostSchema>;
 
-export const deletePostSchema = z.object({
+export const postIdSchema = z.object({
   postId: z.string()
 })
-export type DeletePostSchemaT = z.infer<typeof deletePostSchema>
+export type PostIdSchemaT = z.infer<typeof deletePostSchema>;
+
+export const deletePostSchema = postIdSchema.extend({})
+export type DeletePostSchemaT = z.infer<typeof deletePostSchema>;
 
 export const updatePostSchema = createPostSchema
   .merge(deletePostSchema)
@@ -16,3 +19,18 @@ export const updatePostSchema = createPostSchema
     summary: z.string().min(10, "Summary must be at least 10 characters").optional(),
   });
 export type UpdatePostSchemaT = z.infer<typeof updatePostSchema>;
+
+export const addPostCollaboratorSchema = postIdSchema.extend({
+  email: z.email("Please enter a valid email"),
+});
+export type AddPostCollaboratorSchemaT = z.infer<typeof addPostCollaboratorSchema>;
+
+export const removePostCollaboratorSchema = postIdSchema.extend({
+  collaboratorId: z.string(),
+});
+export type RemovePostCollaboratorSchemaT = z.infer<typeof removePostCollaboratorSchema>;
+
+export const updatePostPrivacySchema = postIdSchema.extend({
+  privacySetting: z.boolean(),
+});
+export type UpdatePostPrivacySchemaT = z.infer<typeof updatePostPrivacySchema>;
