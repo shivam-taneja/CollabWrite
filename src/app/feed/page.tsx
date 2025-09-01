@@ -20,6 +20,7 @@ import PostCard from '@/components/post/post-card';
 
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import {
   Pagination,
@@ -148,9 +149,25 @@ const FeedPage = () => {
         </div>
 
         {isLoading ? (
-          <div className='flex justify-center items-center w-full'>
-            <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
-          </div>
+          <>
+            <div className='flex justify-center items-center w-full'>
+              <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
+            </div>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {Array.from({ length: 3 }).map((_, idx) => (
+                <Card key={idx} className="h-48 p-4 animate-pulse">
+                  <div className="flex flex-col space-y-3 h-full">
+                    <div className="h-24 bg-gray-300 rounded-md" />
+
+                    <div className="h-4 bg-gray-300 rounded w-3/4" />
+
+                    <div className="h-3 bg-gray-200 rounded w-1/2" />
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </>
         ) : (
           <>
             {!parsedDefaults.success ? (
