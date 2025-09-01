@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -25,11 +26,10 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { DialogDescription } from "@radix-ui/react-dialog";
 import { Loader2 } from "lucide-react";
 import { toast } from "react-toastify";
 
-const EditPostModal = ({
+const UpdatePostModal = ({
   isOpen,
   onOpenChange,
   post,
@@ -54,8 +54,8 @@ const EditPostModal = ({
 
   async function onSubmit(values: UpdatePostSchemaT) {
     try {
-      const response = await mutateAsync(values)
-
+      await mutateAsync(values)
+      toast.success("Post updated successfully!");
     } catch (err) {
       toast.error("Someting went wrong!")
     } finally {
@@ -123,4 +123,4 @@ const EditPostModal = ({
   );
 };
 
-export default EditPostModal;
+export default UpdatePostModal;
