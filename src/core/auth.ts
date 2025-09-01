@@ -4,6 +4,7 @@ import { persist } from 'zustand/middleware';
 import CryptoJS from 'crypto-js';
 
 import { AuthState } from '@/types/auth';
+import { account } from '@/lib/appwrite-client';
 
 const SECRET_KEY = process.env.NEXT_PUBLIC_STORAGE_KEY || "fallback-secret";
 
@@ -12,6 +13,9 @@ const useAuthStore = create<AuthState>()(
     (set, get) => ({
       user: null,
       isAuthenticated: false,
+
+      jwt: null,
+      jwtExpiry: null,
 
       actions: {
         setUser: (user) =>
@@ -24,14 +28,36 @@ const useAuthStore = create<AuthState>()(
           set({
             user: null,
             isAuthenticated: false,
+            jwt: null,
+            jwtExpiry: null
           }),
+
+        getValidJwt: async () => {
+          const { jwt, jwtExpiry } = get();
+          const now = Date.now();
+
+          if (jwt && jwtExpiry && now < jwtExpiry) {
+            return jwt;
+          }
+
+          const res = await account.createJWT();
+
+          // setting expiry to be 15 mins
+          const expiry = now + 15 * 60 * 1000;
+
+          set({ jwt: res.jwt, jwtExpiry: expiry });
+
+          return res.jwt;
+        },
       }
     }),
     {
       name: 'auth-storage',
       partialize: (state) => ({
         user: state.user,
-        isAuthenticated: state.isAuthenticated
+        isAuthenticated: state.isAuthenticated,
+        jwt: state.jwt,
+        jwtExpiry: state.jwtExpiry,
       }),
       storage: {
         getItem: (name) => {

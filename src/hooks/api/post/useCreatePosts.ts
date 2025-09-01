@@ -1,25 +1,27 @@
 import { useMutation, UseMutationResult } from "@tanstack/react-query";
 
-import { account } from "@/lib/appwrite-client";
-
 import { api } from "@/core/api";
+import { useAuthActions } from "@/core/auth";
+
 import { CreatePostSchemaT } from "@/schema/post";
 
 import { ApiResponse } from "@/core/api/types";
 import { CreatePostResult, } from "@/types/post";
 
 export function useCreatePost() {
+  const { getValidJwt } = useAuthActions();
+
   return useMutation({
     mutationKey: ["create-post"],
     mutationFn: async ({ title }) => {
       try {
-        const jwt = await account.createJWT();
+        const jwt = await getValidJwt();
 
         const response = await api.post<ApiResponse<CreatePostResult>>({
           entity: "post/create",
           data: { title },
           options: {
-            headers: { Authorization: `Bearer ${jwt.jwt}` },
+            headers: { Authorization: `Bearer ${jwt}` },
           },
         });
 

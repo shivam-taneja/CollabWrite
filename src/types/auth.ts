@@ -8,9 +8,13 @@ export interface AuthState {
   user: AuthUser | null;
   isAuthenticated: boolean;
 
+  jwt: string | null;
+  jwtExpiry: number | null; // epoch ms
+
   actions: {
     setUser: (user: AuthUser | null) => void;
     logout: () => void;
+    getValidJwt: () => Promise<string>;
   }
 }
 
