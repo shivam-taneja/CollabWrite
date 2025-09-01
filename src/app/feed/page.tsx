@@ -16,7 +16,7 @@ import { POST_CATEGORIES, PostCategory } from '@/types/post';
 
 import { FEED_LIMIT } from '@/utils/constants';
 
-import PostCard from '@/components/post/post-card';
+import PostCard from '@/components/feed/post-card';
 
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';

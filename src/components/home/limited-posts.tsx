@@ -4,7 +4,7 @@ import React from 'react';
 
 import { useGetFeed } from '@/hooks/api/feed/useGetFeed';
 
-import PostCard from '@/components/post/post-card';
+import PostCard from '@/components/feed/post-card';
 import { Card } from '@/components/ui/card';
 
 const LimitedPosts = () => {
