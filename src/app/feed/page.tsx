@@ -73,7 +73,7 @@ const FeedPage = () => {
     setParam('search', debouncedSearch || undefined);
   }, [debouncedSearch]);
 
-  const { data, isLoading } = useGetFeed({
+  const { data, isLoading, isFetching } = useGetFeed({
     params: cleanParams({
       search: debouncedSearch,
       category,
@@ -149,7 +149,7 @@ const FeedPage = () => {
             </div>
           </div>
 
-          {isLoading ? (
+          {isLoading || isFetching ? (
             <>
               <div className='flex justify-center items-center w-full'>
                 <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
