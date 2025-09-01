@@ -1,6 +1,9 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+@plugin "@tailwindcss/typography"; 
+@import 'highlight.js/styles/github-dark.css';
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -63,6 +66,15 @@
 @utility container {
   margin-inline: auto;
   padding-inline: 2rem;
+
+}
+
+@layer utilities {
+  @media (width <= 640px) {
+    .container {
+      max-width: 100% !important;
+    }
+  }
 }
 
 @utility hero-gradient {
@@ -199,4 +211,22 @@
 
 #nprogress .bar {
   background: var(--gradient-primary) !important;
+}
+
+.prose pre {
+  background: #1e1e1e; /* dark background */
+  color: #e5e5e5; /* default text color */
+  padding: 1rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* Ensure inline <code> looks different */
+.prose code {
+  background: rgba(240, 240, 240, 0.1);
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.25rem;
+  font-size: 0.85rem;
 }

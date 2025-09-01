@@ -52,25 +52,37 @@ const MyPostsPage = () => {
                 <div className="space-y-6">
                   <h2 className="text-2xl font-semibold">Posts you own</h2>
 
-                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {myPosts.owner.posts.map((post) => (
-                      <div key={post.$id} className="relative">
-                        <UserPostCard postDetails={post} isOwner />
-                      </div>
-                    ))}
-                  </div>
+                  {myPosts.owner.total === 0 ? (
+                    <p className="text-muted-foreground text-sm">
+                      You don’t own any posts yet. Start creating one!
+                    </p>
+                  ) : (
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {myPosts.owner.posts.map((post) => (
+                        <div key={post.$id} className="relative">
+                          <UserPostCard postDetails={post} isOwner />
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 <div className="space-y-6">
                   <h2 className="text-2xl font-semibold">Posts shared with you</h2>
 
-                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {myPosts.editor.posts.map((post) => (
-                      <div key={post.$id} className="relative">
-                        <UserPostCard postDetails={post} />
-                      </div>
-                    ))}
-                  </div>
+                  {myPosts.editor.total === 0 ? (
+                    <p className="text-muted-foreground text-sm">
+                      No posts have been shared with you yet.
+                    </p>
+                  ) : (
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {myPosts.editor.posts.map((post) => (
+                        <div key={post.$id} className="relative">
+                          <UserPostCard postDetails={post} />
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </>
             ) : (

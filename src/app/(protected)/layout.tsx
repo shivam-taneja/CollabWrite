@@ -1,40 +1,11 @@
-"use client";
-
-import { useEffect, useState } from "react";
-
-import { useRouter } from "next/navigation";
-
-import { useIsAuthenticated } from "@/core/auth";
-
-import Loading from "@/components/shared/loading";
+import ProtectedWrapper from "@/core/protected-wrapper";
 
 const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
-  const router = useRouter();
-  const isAuthenticated = useIsAuthenticated();
-
-  const [hasHydrated, setHasHydrated] = useState(false)
-
-  useEffect(() => {
-    setHasHydrated(true)
-  }, [])
-
-  useEffect(() => {
-    if (!isAuthenticated && hasHydrated) {
-      router.replace("/feed");
-    }
-  }, [isAuthenticated, router, hasHydrated]);
-
-  if (!hasHydrated)
-    return <Loading />;
-
-  if (!isAuthenticated)
-    return <Loading />;
-
   return (
-    <section className="bg-gray-50">
-      {children}
-    </section>
-  )
-}
+    <ProtectedWrapper>
+      <section className="bg-gray-50">{children}</section>
+    </ProtectedWrapper>
+  );
+};
 
-export default ProtectedLayout
+export default ProtectedLayout;

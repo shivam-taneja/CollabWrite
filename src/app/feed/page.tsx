@@ -16,7 +16,7 @@ import { POST_CATEGORIES, PostCategory } from '@/types/post';
 
 import { FEED_LIMIT } from '@/utils/constants';
 
-import PostCard from '@/components/feed/post-card';
+import FeedPostCard from '@/components/feed/feed-post-card';
 
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -194,7 +194,7 @@ const FeedPage = () => {
                   {posts.length > 0 ? (
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {posts.map((p, idx) => (
-                        <PostCard postDetails={p} key={idx} />
+                        <FeedPostCard postDetails={p} key={idx} />
                       ))}
                     </div>
                   ) : (
