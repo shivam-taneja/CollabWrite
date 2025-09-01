@@ -9,8 +9,9 @@ import { formatDistanceToNow } from 'date-fns';
 
 import { UserPostsSection } from '@/types/user';
 
-import EditPostModal from '@/components/post/edit-post-modal';
+import DeletePostModal from '@/components/post/delete-post-modal';
 import PostSettingsModal from '@/components/post/post-settings-modal';
+import UpdatePostModal from '@/components/post/update-post-modal';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -36,10 +37,13 @@ import {
 
 const UserPostCard = ({
   postDetails,
+  isOwner = false
 }: {
-  postDetails: UserPostsSection['posts'][0]
+  postDetails: UserPostsSection['posts'][0],
+  isOwner?: boolean
 }) => {
   const [editOpen, setEditOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   const { $createdAt, $id, category, summary, title, isPrivate } = postDetails;
@@ -79,34 +83,30 @@ const UserPostCard = ({
 
               <DropdownMenuContent align="end" className="bg-white">
                 <DropdownMenuItem
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    setEditOpen(true)
-                  }}
+                  onClick={(e) => setEditOpen(true)}
                   className="cursor-pointer"
                 >
-                  <Pencil className="mr-2 h-4 w-4" /> Edit Post
+                  <Pencil className="mr-2 h-4 w-4" /> Update Post
                 </DropdownMenuItem>
 
-                <DropdownMenuItem
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    alert('Delete Post TODO')
-                  }}
-                  className="cursor-pointer"
-                >
-                  <Trash className="mr-2 h-4 w-4" /> Delete
-                </DropdownMenuItem>
+                {isOwner &&
+                  <>
+                    <DropdownMenuItem
+                      onClick={(e) => setSettingsOpen(true)}
+                      className="cursor-pointer"
+                    >
+                      <Settings className="mr-2 h-4 w-4" /> Update Settings
+                    </DropdownMenuItem>
 
-                <DropdownMenuItem
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    setSettingsOpen(true)
-                  }}
-                  className="cursor-pointer"
-                >
-                  <Settings className="mr-2 h-4 w-4" /> Settings
-                </DropdownMenuItem>
+                    <DropdownMenuItem
+                      variant='destructive'
+                      onClick={(e) => setDeleteOpen(true)}
+                      className="cursor-pointer"
+                    >
+                      <Trash className="mr-2 h-4 w-4" /> Delete Post
+                    </DropdownMenuItem>
+                  </>
+                }
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -126,9 +126,15 @@ const UserPostCard = ({
         </p>
       </CardContent>
 
-      <EditPostModal
+      <UpdatePostModal
         isOpen={editOpen}
         onOpenChange={setEditOpen}
+        post={postDetails}
+      />
+
+      <DeletePostModal
+        isOpen={deleteOpen}
+        onOpenChange={setDeleteOpen}
         post={postDetails}
       />
 
