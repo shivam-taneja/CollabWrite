@@ -18,7 +18,7 @@ export function useCreatePost() {
         const jwt = await getValidJwt();
 
         const response = await api.post<ApiResponse<CreatePostResult>>({
-          entity: "post/create",
+          entity: "post",
           data: { title },
           options: {
             headers: { Authorization: `Bearer ${jwt}` },
