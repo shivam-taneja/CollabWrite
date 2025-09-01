@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-import { useGetFeed } from '@/hooks/feed/useGetFeed';
+import { useGetFeed } from '@/hooks/api/feed/useGetFeed';
 
 import PostCard from '@/components/post/post-card';
 import { Card } from '@/components/ui/card';

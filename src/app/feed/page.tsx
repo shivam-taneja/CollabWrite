@@ -7,7 +7,7 @@ import React, { useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 
-import { useGetFeed } from '@/hooks/feed/useGetFeed';
+import { useGetFeed } from '@/hooks/api/feed/useGetFeed';
 import useDebounce from '@/hooks/use-debounce';
 
 import { FeedSearchFormT, feedSearchSchema } from '@/schema/feed';
