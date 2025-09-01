@@ -31,7 +31,7 @@ const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
     return <Loading />;
 
   return (
-    <section>
+    <section className="bg-gray-50">
       {children}
     </section>
   )
