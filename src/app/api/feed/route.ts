@@ -108,7 +108,7 @@ export async function GET(req: Request) {
       data: payload,
     });
   } catch (err) {
-    console.error("Error fetching public feed:", err);
+    console.error("Error fetching public feed: ", err);
     return NextResponse.json<ApiResponse>(
       { success: false, error: "Failed to fetch feed" },
       { status: 500 }
