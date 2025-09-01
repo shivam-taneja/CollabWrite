@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { Account, Client, Query, TablesDB } from "node-appwrite";
+import { Query, TablesDB } from "node-appwrite";
 
-import { ApiResponse } from "@/core/api/types";
+import { requireUser } from "@/lib/auth";
 import db from "@/lib/db";
 import { updatePostSchema } from "@/schema/post";
 
+import { ApiResponse } from "@/core/api/types";
 import { UserPost } from "@/types/user";
 
 export async function PATCH(req: NextRequest) {
@@ -22,31 +23,9 @@ export async function PATCH(req: NextRequest) {
 
     const { postId, title, summary } = parsed.data;
 
-    const authHeader = req.headers.get("authorization");
-    if (!authHeader) {
-      return NextResponse.json<ApiResponse>(
-        { success: false, error: "Unauthorized" },
-        { status: 401 }
-      );
-    }
-
-    const jwt = authHeader.split(" ")[1];
-    const userClient = new Client()
-      .setEndpoint(process.env.APPWRITE_ENDPOINT!)
-      .setProject(process.env.APPWRITE_PROJECT_ID!)
-      .setJWT(jwt);
-
-    let userId: string;
-    try {
-      const account = new Account(userClient);
-      const { $id } = await account.get();
-      userId = $id;
-    } catch {
-      return NextResponse.json<ApiResponse>(
-        { success: false, error: "Invalid or expired token" },
-        { status: 401 }
-      );
-    }
+    const { userId, userClient, error } = await requireUser(req);
+    if (error)
+      return error;
 
     const tables = new TablesDB(userClient);
 
