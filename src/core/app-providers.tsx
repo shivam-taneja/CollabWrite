@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 
-import React, { useEffect } from 'react';
+import React, { Suspense, useEffect } from 'react';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
@@ -13,6 +13,7 @@ import NextTopLoader from 'nextjs-toploader';
 
 import Footer from "@/components/shared/footer";
 import Header from "@/components/shared/header";
+import Loading from '@/components/shared/loading';
 import { ToastContainer } from 'react-toastify';
 
 const authRoutes = ['/auth/login', '/auth/signup'];
@@ -40,33 +41,35 @@ const AppProviders = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <NextTopLoader
-        color='#000080'
-        height={4}
-      />
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        toastStyle={{
-          background: 'var(--gradient-primary)',
-          color: '#fff',
-          fontWeight: 'bold',
-          borderRadius: '12px',
-        }}
-        className="p-4 sm:p-0"
-      />
-      {!isAuthRoute && <Header />}
-      {children}
-      {!isAuthRoute && <Footer />}
-    </QueryClientProvider>
+    <Suspense fallback={<Loading />}>
+      <QueryClientProvider client={queryClient}>
+        <NextTopLoader
+          color='#000080'
+          height={4}
+        />
+        <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          toastStyle={{
+            background: 'var(--gradient-primary)',
+            color: '#fff',
+            fontWeight: 'bold',
+            borderRadius: '12px',
+          }}
+          className="p-4 sm:p-0"
+        />
+        {!isAuthRoute && <Header />}
+        {children}
+        {!isAuthRoute && <Footer />}
+      </QueryClientProvider>
+    </Suspense>
   )
 }
 
