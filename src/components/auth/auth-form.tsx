@@ -9,7 +9,7 @@ import { LoginFormData, loginSchema, SignupFormData, signupSchema } from '@/sche
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 
-import { useAuth } from '@/hooks/api/auth/use-auth';
+import { useAuth } from '@/hooks/api/auth/useAuth';
 
 import { AuthFormProps } from '@/types/auth';
 
