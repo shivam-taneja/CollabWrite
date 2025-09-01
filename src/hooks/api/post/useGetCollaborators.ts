@@ -6,7 +6,7 @@ import { api } from "@/core/api";
 import { useAuthActions } from "@/core/auth";
 
 import { ApiResponse } from "@/core/api/types";
-import { CollaboratorsDetails } from "@/types/post";
+import { PostCollaboratorsEditorDetails } from "@/types/post";
 
 export function useGetCollaborators({
   postId,
@@ -22,7 +22,7 @@ export function useGetCollaborators({
     queryFn: async () => {
       const jwt = await getValidJwt();
 
-      const response = await api.get<ApiResponse<CollaboratorsDetails[]>>({
+      const response = await api.get<ApiResponse<PostCollaboratorsEditorDetails[]>>({
         entity: "post/collaborators",
         options: {
           headers: { Authorization: `Bearer ${jwt}` },
@@ -39,5 +39,5 @@ export function useGetCollaborators({
     retry: false,
     refetchOnWindowFocus: false,
     ...queryOptions
-  }) as UseQueryResult<CollaboratorsDetails[], Error>;
+  }) as UseQueryResult<PostCollaboratorsEditorDetails[], Error>;
 }

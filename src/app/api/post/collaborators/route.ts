@@ -6,7 +6,7 @@ import db from "@/lib/db";
 import { addPostCollaboratorSchema, postIdSchema, removePostCollaboratorSchema } from "@/schema/post";
 
 import { ApiResponse } from "@/core/api/types";
-import { CollaboratorsDetails } from "@/types/post";
+import { PostCollaboratorsEditorDetails } from "@/types/post";
 
 export async function GET(req: NextRequest) {
   try {
@@ -54,7 +54,7 @@ export async function GET(req: NextRequest) {
 
     const users = new Users(serverClient);
 
-    const editorDetails: CollaboratorsDetails[] = await Promise.all(
+    const editorDetails: PostCollaboratorsEditorDetails[] = await Promise.all(
       editors.documents.map(async (c: any) => {
         try {
           const user = await users.get(c.userId);
@@ -76,7 +76,7 @@ export async function GET(req: NextRequest) {
       })
     );
 
-    return NextResponse.json<ApiResponse<CollaboratorsDetails[]>>({
+    return NextResponse.json<ApiResponse<PostCollaboratorsEditorDetails[]>>({
       success: true,
       data: editorDetails,
     });

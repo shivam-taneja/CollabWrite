@@ -1,6 +1,6 @@
-import { Post } from "./post"
+import { PostDB } from "./post"
 
-export type UserPost = Post & {
+export type UserPost = PostDB & {
   isPrivate: boolean
 }
 

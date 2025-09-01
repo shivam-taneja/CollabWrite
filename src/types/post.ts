@@ -1,6 +1,6 @@
-import { Models } from "node-appwrite"
+import { Models } from "node-appwrite";
 
-export interface Post extends Models.Row {
+export interface PostDB extends Models.Row {
   $id: string,
   title: string,
   content: string,
@@ -11,23 +11,26 @@ export interface Post extends Models.Row {
   isPrivate: boolean
 }
 
-export type PostCollaboratorsRole = 'owner' | 'editor'
-
-export interface PostCollaborators {
-  role: PostCollaboratorsRole,
-  $id: string,
-  userId: string
+export interface PostCollaboratorDB extends Models.Row {
+  userId: string;
+  role: PostCollaboratorsRole;
 }
 
-export interface CollaboratorsDetails {
+export type PostCollaboratorsRole = 'owner' | 'editor'
+
+export interface PostCollaboratorsEditorDetails
+  extends Pick<PostCollaboratorDB, "role"> {
   $id: string,
   name: string,
   email: string,
-  role: PostCollaboratorsRole
 }
 
-export type PostWithCollab = Post & {
-  postCollaborators: PostCollaborators[]
+export interface PostDetails
+  extends Pick<PostDB, "$id" | "title" | "content" | "summary" | "category" | '$createdAt' | '$updatedAt'> {
+  postCollaborators: {
+    owner: string;
+    collaborators: string[];
+  };
 }
 
 export type PostCategory = "Tech" | "Life" | "Food" | "Health" | "Other"

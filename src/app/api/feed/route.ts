@@ -7,9 +7,13 @@ import { backendFeedSearchSchema } from "@/schema/feed";
 
 import { ApiResponse } from "@/core/api/types";
 import { FeedData } from "@/types/feed";
-import { PostWithCollab } from "@/types/post";
+import { PostCollaboratorDB, PostDB } from "@/types/post";
 
 import { FEED_LIMIT } from "@/utils/constants";
+
+type PostResultDB = PostDB & {
+  postCollaborators: PostCollaboratorDB[]
+}
 
 export async function GET(req: Request) {
   try {
@@ -61,11 +65,12 @@ export async function GET(req: Request) {
       ]));
     }
 
-    const posts = await tables.listRows<PostWithCollab>(db.dbID, db.posts, queries);
+    const posts = await tables.listRows<PostResultDB>(db.dbID, db.posts, queries);
 
     const enrichedPosts: FeedData['rows'] = [];
     for (const post of posts.rows) {
       const collaborators = post.postCollaborators ?? [];
+
       const owner = collaborators.find(c => c.role === "owner");
 
       let ownerName = "Unknown User";

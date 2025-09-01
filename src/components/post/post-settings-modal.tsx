@@ -3,10 +3,18 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 
+import { useAddCollaborator } from "@/hooks/api/post/useAddCollaborator";
 import { useGetCollaborators } from "@/hooks/api/post/useGetCollaborators";
+import { useUpdatePostPrivacy } from "@/hooks/api/post/useUpdatePostPrivacy";
+
+import { addPostCollaboratorSchema, AddPostCollaboratorSchemaT } from "@/schema/post";
+
+import { PostCollaboratorsEditorDetails } from "@/types/post";
 import { UserPostsSection } from "@/types/user";
+
+import RemovePostCollaboratorAlert from "./remove-post-collaborator-alert";
+import StopPostSharingAlert from "./stop-post-sharing-alert";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -26,14 +34,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { useAddCollaborator } from "@/hooks/api/post/useAddCollaborator";
-import { useUpdatePostPrivacy } from "@/hooks/api/post/useUpdatePostPrivacy";
-import { addPostCollaboratorSchema, AddPostCollaboratorSchemaT } from "@/schema/post";
-import { CollaboratorsDetails } from "@/types/post";
 import { Loader2, Trash2 } from "lucide-react";
 import { toast } from "react-toastify";
-import RemovePostCollaboratorAlert from "./remove-post-collaborator-alert";
-import StopPostSharingAlert from "./stop-post-sharing-alert";
 
 const PostSettingsModal = ({
   isOpen,
@@ -46,7 +48,7 @@ const PostSettingsModal = ({
 }) => {
   const [isShared, setIsShared] = useState(false);
   const [stopPostSharingConfirmOpen, setStopPostSharingConfirmOpen] = useState(false);
-  const [collaboratorToRemove, setCollaboratorToRemove] = useState<CollaboratorsDetails | null>(null);
+  const [collaboratorToRemove, setCollaboratorToRemove] = useState<PostCollaboratorsEditorDetails | null>(null);
 
   const { data: collaborators, isLoading, isFetching } = useGetCollaborators({
     postId: post.$id,

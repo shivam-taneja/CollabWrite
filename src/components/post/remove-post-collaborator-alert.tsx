@@ -4,7 +4,7 @@ import React, { Dispatch, SetStateAction } from 'react';
 
 import { useRemovePostCollaborator } from '@/hooks/api/post/useRemovePostCollaborator';
 
-import { CollaboratorsDetails } from '@/types/post';
+import { PostCollaboratorsEditorDetails } from '@/types/post';
 
 import {
   AlertDialog,
@@ -25,8 +25,8 @@ const RemovePostCollaboratorAlert = ({
   setCollaboratorToRemove
 }: {
   postId: string,
-  collaboratorToRemove: CollaboratorsDetails | null,
-  setCollaboratorToRemove: Dispatch<SetStateAction<CollaboratorsDetails | null>>,
+  collaboratorToRemove: PostCollaboratorsEditorDetails | null,
+  setCollaboratorToRemove: Dispatch<SetStateAction<PostCollaboratorsEditorDetails | null>>,
 }) => {
   const {
     mutateAsync: removeCollaborator,

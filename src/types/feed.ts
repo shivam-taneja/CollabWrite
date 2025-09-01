@@ -1,4 +1,4 @@
-import { CollaboratorsDetails, Post } from "./post";
+import { PostDB } from "./post";
 
 export interface FeedCollaborators {
   count: number;
@@ -6,7 +6,7 @@ export interface FeedCollaborators {
 }
 
 export type FeedRow = Pick<
-  Post,
+  PostDB,
   "$id" | "title" | "summary" | "$createdAt" | "category"
 > & {
   postCollaborators: FeedCollaborators;
