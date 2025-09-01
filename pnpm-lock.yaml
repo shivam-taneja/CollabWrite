@@ -95,6 +95,9 @@ importers:
       isomorphic-dompurify:
         specifier: ^2.26.0
         version: 2.26.0
+      jsdom:
+        specifier: ^26.1.0
+        version: 26.1.0
       lowlight:
         specifier: ^3.3.0
         version: 3.3.0
@@ -141,12 +144,6 @@ importers:
       '@types/crypto-js':
         specifier: ^4.2.2
         version: 4.2.2
-      '@types/highlight.js':
-        specifier: ^10.1.0
-        version: 10.1.0
-      '@types/lowlight':
-        specifier: ^2.0.1
-        version: 2.0.1
       '@types/node':
         specifier: ^20
         version: 20.19.11
@@ -1068,16 +1065,8 @@ packages:
   '@types/hast@3.0.4':
     resolution: {integrity: sha512-WPs+bbQw5aCj+x6laNGWLH3wviHtoCv/P3+otBhbOhJgG8qtpdAMlTCxLtsTWA7LH1Oh/bFCHsBn0TPS5m30EQ==}
 
-  '@types/highlight.js@10.1.0':
-    resolution: {integrity: sha512-77hF2dGBsOgnvZll1vymYiNUtqJ8cJfXPD6GG/2M0aLRc29PkvB7Au6sIDjIEFcSICBhCh2+Pyq6WSRS7LUm6A==}
-    deprecated: This is a stub types definition. highlight.js provides its own type definitions, so you do not need this installed.
-
   '@types/linkify-it@5.0.0':
     resolution: {integrity: sha512-sVDA58zAw4eWAffKOaQH5/5j3XeayukzDk+ewSsnv3p4yJEZHCCzMDiZM8e0OUrRvmpGZ85jf4yDHkHsgBNr9Q==}
-
-  '@types/lowlight@2.0.1':
-    resolution: {integrity: sha512-2N7LEksHqNGYiqm2Oip7NDuhiaUjzp3KjguXHGdxGgaIAaAv8ftDM5Cj1oJBllUxyUkv4e6sReveEBjtF0g1jg==}
-    deprecated: This is a stub types definition. lowlight provides its own type definitions, so you do not need this installed.
 
   '@types/markdown-it@14.1.2':
     resolution: {integrity: sha512-promo4eFwuiW+TfGxhi+0x3czqTYJkG8qB17ZUJiVF10Xm7NLVRSLUsfRTU/6h1e24VvRnXCx+hG7li58lkzog==}
@@ -2741,15 +2730,7 @@ snapshots:
     dependencies:
       '@types/unist': 3.0.3
 
-  '@types/highlight.js@10.1.0':
-    dependencies:
-      highlight.js: 11.11.1
-
   '@types/linkify-it@5.0.0': {}
-
-  '@types/lowlight@2.0.1':
-    dependencies:
-      lowlight: 3.3.0
 
   '@types/markdown-it@14.1.2':
     dependencies:
