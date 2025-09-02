@@ -13,6 +13,7 @@ export interface PostDB extends Models.Row {
 
 export interface PostCollaboratorDB extends Models.Row {
   userId: string;
+  displayName: string,
   role: PostCollaboratorsRole;
 }
 

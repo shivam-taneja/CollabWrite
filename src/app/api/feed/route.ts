@@ -69,20 +69,9 @@ export async function GET(req: Request) {
 
     const enrichedPosts: FeedData['rows'] = [];
     for (const post of posts.rows) {
-      const collaborators = post.postCollaborators ?? [];
+      const collaborators = post.postCollaborators;
 
       const owner = collaborators.find(c => c.role === "owner");
-
-      let ownerName = "Unknown User";
-
-      if (owner) {
-        try {
-          const user = await users.get(owner.userId);
-          ownerName = user.name;
-        } catch {
-          ownerName = "Unknown User";
-        }
-      }
 
       enrichedPosts.push({
         $id: post.$id,
@@ -92,7 +81,7 @@ export async function GET(req: Request) {
         category: post.category,
         postCollaborators: {
           count: collaborators.length,
-          owner: ownerName
+          owner: owner?.displayName ?? "Unkown User"
         },
       });
     }

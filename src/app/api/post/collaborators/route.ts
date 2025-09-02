@@ -167,6 +167,7 @@ export async function POST(req: NextRequest) {
       ID.unique(),
       {
         userId: targetUser.$id,
+        displayName: targetUser.name ?? targetUser.email.charAt(0),
         role: "editor",
         posts: postId,
       }

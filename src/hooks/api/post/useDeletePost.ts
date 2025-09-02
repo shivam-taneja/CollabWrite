@@ -15,10 +15,9 @@ export function useDeletePost() {
       const jwt = await account.createJWT();
 
       const response = await api.delete<ApiResponse<{ deleted: true }>>({
-        entity: "post",
+        entity: `post/${postId}`,
         options: {
           headers: { Authorization: `Bearer ${jwt.jwt}` },
-          params: { postId }
         },
       });
 

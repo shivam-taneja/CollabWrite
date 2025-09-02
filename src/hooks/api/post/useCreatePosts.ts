@@ -1,4 +1,4 @@
-import { useMutation, UseMutationResult } from "@tanstack/react-query";
+import { useMutation, UseMutationResult, useQueryClient } from "@tanstack/react-query";
 
 import { api } from "@/core/api";
 import { useAuthActions } from "@/core/auth";
@@ -9,6 +9,7 @@ import { ApiResponse } from "@/core/api/types";
 import { CreatePostResult, } from "@/types/post";
 
 export function useCreatePost() {
+  const queryClient = useQueryClient()
   const { getValidJwt } = useAuthActions();
 
   return useMutation({
@@ -34,5 +35,8 @@ export function useCreatePost() {
         throw err;
       }
     },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-posts"] });
+    }
   }) as UseMutationResult<ApiResponse<CreatePostResult>, ApiResponse, CreatePostSchemaT>;
 }
