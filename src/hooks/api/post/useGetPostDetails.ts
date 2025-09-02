@@ -6,7 +6,7 @@ import { useAuthActions } from "@/core/auth";
 
 import { PostDetails } from "@/types/post";
 
-export function useGetPostDetailsById({
+export function useGetPostDetails({
   postId,
   requireAuth = false,
   queryOptions

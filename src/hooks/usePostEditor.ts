@@ -1,7 +1,10 @@
 'use client';
 
-import { useCallback, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
+import { useForm } from 'react-hook-form';
+
+import { zodResolver } from '@hookform/resolvers/zod';
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
 import Color from '@tiptap/extension-color';
 import Highlight from '@tiptap/extension-highlight';
@@ -16,10 +19,15 @@ import javascript from 'highlight.js/lib/languages/javascript';
 import typescript from 'highlight.js/lib/languages/typescript';
 import xml from 'highlight.js/lib/languages/xml';
 
-import { UpdatePostDetails } from '@/types/post';
 import { common, createLowlight } from 'lowlight';
+
+import pickDirty from '@/lib/pickDirty';
+import { updatePostSchema, UpdatePostSchemaT } from '@/schema/post';
+
+import { useUpdatePost } from './api/post/useUpdatePost';
+
+import { PostDetails } from '@/types/post';
 import { toast } from 'react-toastify';
-import { useUpdatePostDetailsById } from './api/post/useUpdatePostDetailsById';
 
 const lowlight = createLowlight(common);
 lowlight.register('javascript', javascript);
@@ -27,67 +35,94 @@ lowlight.register('typescript', typescript);
 lowlight.register('css', css);
 lowlight.register('html', xml);
 
-export function usePostEditor(content?: string, postId?: string) {
+export function usePostEditor(post: PostDetails) {
+  const { $id, content, title, summary, category } = post
   const initialContentRef = useRef(content ?? '');
+
+  const [isContentDirty, setIsContentDirty] = useState(false);
+
+  const form = useForm<UpdatePostSchemaT>({
+    resolver: zodResolver(updatePostSchema),
+    defaultValues: {
+      title,
+      summary,
+      postId: $id,
+      content,
+      category
+    },
+    mode: 'all'
+  });
+
+  const { mutateAsync, isPending } = useUpdatePost();
 
   const editor = useEditor({
     extensions: [
-      StarterKit.configure({
-        codeBlock: false,
-        link: false,
-        underline: false,
-      }),
+      StarterKit.configure({ codeBlock: false, link: false, underline: false }),
       Underline,
       Link,
       TextStyle,
       Color,
       Highlight,
-      CodeBlockLowlight.configure({ lowlight }),
+      CodeBlockLowlight.configure({ lowlight })
     ],
     content,
     immediatelyRender: false,
+    onUpdate: ({ editor }) => {
+      setIsContentDirty(editor.getHTML() !== initialContentRef.current);
+    }
   });
 
-  const {
-    mutateAsync,
-    isPending
-  } = useUpdatePostDetailsById()
+  useEffect(() => {
+    form.reset({
+      title: post.title,
+      summary: post.summary,
+      postId: post.$id,
+      content: post.content,
+      category: post.category,
+    });
 
-  const save = async ({ updatedDetails }: { updatedDetails: Partial<UpdatePostDetails> }) => {
-    if (!editor || !postId)
-      return;
+    if (editor && post.content) {
+      editor.commands.setContent(post.content);
+      initialContentRef.current = post.content;
+      setIsContentDirty(false);
+    }
+  }, [post, form, editor]);
 
-    const payload: Partial<UpdatePostDetails> = { ...updatedDetails };
+  const { dirtyFields } = form.formState;
 
-    const html = editor.getHTML();
+  async function onSubmit(values: UpdatePostSchemaT) {
+    // Build minimal payload
+    const changedValues = pickDirty(values, dirtyFields);
 
-    // Only include content if it changed
-    if (html !== initialContentRef.current) {
-      payload.content = html;
+    // Check editor content separately
+    const html = editor?.getHTML();
+    if (html && html !== initialContentRef.current) {
+      changedValues.content = html;
     }
 
-    // If nothing changed, skip request
-    if (Object.keys(payload).length === 0) {
-      toast.info('No changes to save');
+    if (Object.keys(changedValues).length === 0) {
       return;
     }
 
     try {
-      await mutateAsync({
-        postId,
-        updatedDetails
-      });
+      await mutateAsync({ postId: $id, ...changedValues });
 
-      // Update reference so future saves only detect new changes
-      if (payload.content !== undefined) {
-        initialContentRef.current = payload.content;
+      form.reset(values);
+
+      if (changedValues.content) {
+        initialContentRef.current = changedValues.content;
       }
-
       toast.success('Post saved!');
-    } catch (err) {
+    } catch {
       toast.error('Error saving post');
     }
-  };
+  }
 
-  return { editor, save, isSaving: isPending }
+  return {
+    editor,
+    form,
+    onSubmit,
+    isSaving: isPending,
+    isDirty: Object.keys(dirtyFields).length > 0 || isContentDirty
+  };
 }

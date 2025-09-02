@@ -14,12 +14,12 @@ export function useUpdatePost() {
 
   return useMutation({
     mutationKey: ["update-post"],
-    mutationFn: async (data) => {
+    mutationFn: async ({ postId, ...updatedData }) => {
       const jwt = await getValidJwt();
 
       const response = await api.patch<ApiResponse<UserPost>>({
-        entity: "post",
-        data: data,
+        entity: `post/${postId}`,
+        data: updatedData,
         options: {
           headers: { Authorization: `Bearer ${jwt}` },
         },

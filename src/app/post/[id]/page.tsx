@@ -4,9 +4,8 @@ import { useParams } from 'next/navigation';
 
 import React from 'react';
 
-import { useGetPostDetailsById } from '@/hooks/api/post/useGetPostDetailsById';
+import { useGetPostDetails } from '@/hooks/api/post/useGetPostDetails';
 
-import { mockPost } from '@/utils/constants';
 import { formatDistanceToNow } from 'date-fns';
 
 import NotFoundPage from '@/app/not-found';
@@ -23,25 +22,22 @@ const PostDetailsPage = () => {
   const params = useParams<{ id: string }>();
   const postId = params.id;
 
-  // const {
-  //   data: post,
-  //   isLoading,
-  //   isFetching,
-  //   isError
-  // } = useGetPostDetailsById({
-  //   postId
-  // });
+  const {
+    data: post,
+    isLoading,
+    isFetching,
+    isError
+  } = useGetPostDetails({
+    postId
+  });
 
-  // Use mock data for demonstration
-  const displayPost = mockPost;
+  if (isLoading || isFetching) {
+    return <Loading />;
+  }
 
-  // if (isLoading || isFetching) {
-  //   return <Loading />;
-  // }
-
-  // if (isError || !post) {
-  //   return <NotFoundPage />;
-  // }
+  if (isError || !post) {
+    return <NotFoundPage />;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-accent/10">
@@ -50,28 +46,28 @@ const PostDetailsPage = () => {
           <div className="flex flex-wrap items-center gap-4 mb-6">
             <Badge variant="secondary" className="text-sm font-medium">
               <Tag className="w-3 h-3 mr-1" />
-              {displayPost.category}
+              {post.category}
             </Badge>
 
             <div className="flex items-center text-muted-foreground text-sm gap-4">
               <span className="flex items-center gap-1">
                 <Calendar className="w-4 h-4" />
-                {formatDistanceToNow(displayPost.$createdAt)}
+                {formatDistanceToNow(post.$createdAt)}
               </span>
 
               <span className="flex items-center gap-1">
                 <Clock className="w-4 h-4" />
-                Last updated {formatDistanceToNow(displayPost.$updatedAt)}
+                Last updated {formatDistanceToNow(post.$updatedAt)}
               </span>
             </div>
           </div>
 
           <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent leading-tight">
-            {displayPost.title}
+            {post.title}
           </h1>
 
           <p className="text-xl text-muted-foreground leading-relaxed mb-6">
-            {displayPost.summary}
+            {post.summary}
           </p>
 
           <Card className="bg-card/50 backdrop-blur-sm border-0 shadow-lg">
@@ -81,7 +77,7 @@ const PostDetailsPage = () => {
                 <div className="flex items-center gap-4">
                   <Avatar className="h-12 w-12 border-black/20 border shadow-sm">
                     <AvatarFallback className="text-xs font-semibold">
-                      {displayPost.postCollaborators.owner.charAt(0).toUpperCase()}
+                      {post.postCollaborators.owner.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
 
@@ -90,11 +86,11 @@ const PostDetailsPage = () => {
                       <User className="w-4 h-4 text-muted-foreground" />
                       <span className="text-sm font-medium text-muted-foreground">Created by</span>
                     </div>
-                    <p className="font-semibold text-lg">{displayPost.postCollaborators.owner}</p>
+                    <p className="font-semibold text-lg">{post.postCollaborators.owner}</p>
                   </div>
                 </div>
 
-                {displayPost.postCollaborators.collaborators.length > 0 && (
+                {post.postCollaborators.collaborators.length > 0 && (
                   <>
                     <Separator orientation="vertical" className="hidden lg:block h-12" />
                     <div className="flex items-center gap-4">
@@ -102,13 +98,13 @@ const PostDetailsPage = () => {
                         <div className="flex items-center gap-2 mb-1">
                           <Users className="w-4 h-4 text-muted-foreground" />
                           <span className="text-sm font-medium text-muted-foreground">
-                            {displayPost.postCollaborators.collaborators.length} Collaborator{displayPost.postCollaborators.collaborators.length !== 1 ? 's' : ''}
+                            {post.postCollaborators.collaborators.length} Collaborator{post.postCollaborators.collaborators.length !== 1 ? 's' : ''}
                           </span>
                         </div>
 
                         <div className="flex items-center gap-2">
                           <div className="flex -space-x-2">
-                            {displayPost.postCollaborators.collaborators.slice(0, 3).map((collaborator, index) => (
+                            {post.postCollaborators.collaborators.slice(0, 3).map((collaborator, index) => (
                               <Avatar key={index} className="h-8 w-8 border-black/20 border shadow-sm">
                                 <AvatarFallback className="text-xs font-semibold">
                                   {collaborator.charAt(0).toUpperCase()}
@@ -117,9 +113,9 @@ const PostDetailsPage = () => {
                             ))}
                           </div>
 
-                          {displayPost.postCollaborators.collaborators.length > 3 && (
+                          {post.postCollaborators.collaborators.length > 3 && (
                             <span className="text-sm text-muted-foreground ml-2">
-                              +{displayPost.postCollaborators.collaborators.length - 3} more
+                              +{post.postCollaborators.collaborators.length - 3} more
                             </span>
                           )}
                         </div>
@@ -134,7 +130,7 @@ const PostDetailsPage = () => {
 
         <Card className="bg-card/80 backdrop-blur-sm border-0 shadow-xl">
           <CardContent className="p-8 md:p-12">
-            <RichTextRenderer html={displayPost.content} />
+            <RichTextRenderer html={post.content} />
           </CardContent>
         </Card>
       </div>

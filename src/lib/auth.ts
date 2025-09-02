@@ -18,8 +18,8 @@ export async function requireUser(req: NextRequest) {
 
   try {
     const account = new Account(userClient);
-    const { $id } = await account.get();
-    return { userId: $id, userClient };
+    const userDetails = await account.get();
+    return { userId: userDetails.$id, userDetails, userClient };
   } catch {
     return { error: NextResponse.json<ApiResponse>({ success: false, error: "Invalid or expired token" }, { status: 401 }) };
   }

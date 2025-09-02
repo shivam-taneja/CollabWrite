@@ -6,6 +6,8 @@ import { useForm } from "react-hook-form";
 
 import { useUpdatePost } from "@/hooks/api/post/useUpdatePost";
 
+import pickDirty from "@/lib/pickDirty";
+
 import { UserPostsSection } from "@/types/user";
 
 import { Button } from "@/components/ui/button";
@@ -45,7 +47,10 @@ const UpdatePostModal = ({
       summary: post.summary,
       postId: post.$id
     },
+    mode: 'all'
   });
+
+  const { formState: { dirtyFields } } = form
 
   const {
     mutateAsync,
@@ -54,7 +59,9 @@ const UpdatePostModal = ({
 
   async function onSubmit(values: UpdatePostSchemaT) {
     try {
-      await mutateAsync(values)
+      const changedValues = pickDirty(values, dirtyFields);
+
+      await mutateAsync({ postId: values.postId, ...changedValues })
       toast.success("Post updated successfully!");
     } catch (err) {
       toast.error("Someting went wrong!")
@@ -62,6 +69,8 @@ const UpdatePostModal = ({
       onOpenChange(false);
     }
   }
+
+  const changed = dirtyFields.title || dirtyFields.summary;
 
   return (
     <Dialog
@@ -112,7 +121,7 @@ const UpdatePostModal = ({
               <Button
                 type="submit"
                 variant="gradient"
-                disabled={isPending}
+                disabled={isPending || !changed}
               >
                 {isPending ? (
                   <>
