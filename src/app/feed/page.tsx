@@ -8,7 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 
 import { useGetFeed } from '@/hooks/api/feed/useGetFeed';
-import useDebounce from '@/hooks/use-debounce';
+import useDebounce from '@/hooks/useDebounce';
 
 import { FeedSearchFormT, feedSearchSchema } from '@/schema/feed';
 

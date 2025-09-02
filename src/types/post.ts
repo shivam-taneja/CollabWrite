@@ -33,6 +33,8 @@ export interface PostDetails
   };
 }
 
+export type UpdatePostDetails = Pick<PostDB, 'title' | 'content' | 'summary' | 'category'>
+
 export type PostCategory = "Tech" | "Life" | "Food" | "Health" | "Other"
 
 export const POST_CATEGORIES: PostCategory[] = ["Tech", "Life", "Food", "Health", "Other"]
