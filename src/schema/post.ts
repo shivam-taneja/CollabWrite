@@ -14,7 +14,7 @@ export const deletePostSchema = postIdSchema.extend({})
 export type DeletePostSchemaT = z.infer<typeof deletePostSchema>;
 
 export const updatePostSchema = createPostSchema
-  .merge(deletePostSchema)
+  .merge(postIdSchema)
   .extend({
     summary: z.string().min(10, "Summary must be at least 10 characters").optional(),
   });

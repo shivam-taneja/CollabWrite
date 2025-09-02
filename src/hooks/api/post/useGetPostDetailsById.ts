@@ -2,15 +2,35 @@ import { useQuery, UseQueryOptions, UseQueryResult } from "@tanstack/react-query
 
 import { api } from "@/core/api";
 import { ApiResponse } from "@/core/api/types";
+import { useAuthActions } from "@/core/auth";
 
 import { PostDetails } from "@/types/post";
 
-export function useGetPostDetailsById({ postId, queryOptions }: { postId: string, queryOptions?: Partial<UseQueryOptions> }) {
+export function useGetPostDetailsById({
+  postId,
+  requireAuth = false,
+  queryOptions
+}: {
+  postId: string,
+  requireAuth?: boolean,
+  queryOptions?: Partial<UseQueryOptions>
+}) {
+  const { getValidJwt } = useAuthActions();
+
   return useQuery({
     queryKey: ["post-details", postId],
     queryFn: async () => {
+      let headers: Record<string, string> = {};
+
+      if (requireAuth) {
+        const jwt = await getValidJwt();
+
+        headers = { Authorization: `Bearer ${jwt}` };
+      }
+
       const response = await api.get<ApiResponse<PostDetails>>({
         entity: `post/${postId}`,
+        options: { headers },
       });
 
       if (!response.success) {

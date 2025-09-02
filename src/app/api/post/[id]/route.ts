@@ -1,4 +1,5 @@
 import { ApiResponse } from "@/core/api/types";
+import { requireUser } from "@/lib/auth";
 import db from "@/lib/db";
 import { PostCollaboratorDB, PostDB, PostDetails } from "@/types/post";
 import { NextRequest, NextResponse } from "next/server";
@@ -10,6 +11,9 @@ export async function GET(
 ) {
   try {
     const { id } = await context.params;
+
+    const { userId, error } = await requireUser(req);
+    const loggedInUserId = !!error ? null : userId;
 
     const client = new Client()
       .setEndpoint(process.env.APPWRITE_ENDPOINT!)
@@ -33,11 +37,33 @@ export async function GET(
       throw err;
     }
 
-    if (!post || post.isPrivate) {
-      return NextResponse.json<ApiResponse>(
-        { success: false, error: "Post not found" },
-        { status: 404 }
+    if (post.isPrivate) {
+      if (!loggedInUserId) {
+        // case 1: not logged in
+        return NextResponse.json<ApiResponse>(
+          { success: false, error: "Post not found" },
+          { status: 404 }
+        );
+      }
+
+      // case 2: logged in → check collab table for this user
+      const collab = await tables.listRows<PostCollaboratorDB>(
+        db.dbID,
+        db.postCollaborators,
+        [
+          Query.equal("posts", id),
+          Query.equal("userId", loggedInUserId),
+          Query.select(["userId", "role"]),
+        ]
       );
+
+      if (collab.rows.length === 0) {
+        // not a collaborator
+        return NextResponse.json<ApiResponse>(
+          { success: false, error: "Post not found" },
+          { status: 404 }
+        );
+      }
     }
 
     const collaborators = await tables.listRows<PostCollaboratorDB>(
@@ -52,23 +78,20 @@ export async function GET(
     let ownerName = "Unknown User";
     const editorNames: string[] = [];
 
-    for (const collab of collaborators.rows) {
+    await Promise.all(collaborators.rows.map(async (collab) => {
       try {
         const user = await users.get(collab.userId);
-
-        if (collab.role === "owner") {
+        if (collab.role === "owner")
           ownerName = user.name;
-        } else if (collab.role === "editor") {
+        else if (collab.role === "editor")
           editorNames.push(user.name);
-        }
       } catch {
-        if (collab.role === "owner") {
+        if (collab.role === "owner")
           ownerName = "Unknown User";
-        } else if (collab.role === "editor") {
+        else if (collab.role === "editor")
           editorNames.push("Unknown User");
-        }
       }
-    }
+    }));
 
     const payload: PostDetails = {
       $id: post.$id,
