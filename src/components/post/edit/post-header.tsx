@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { PostCategory, UpdatePostDetails } from '@/types/post';
 
@@ -36,11 +36,14 @@ const EditPostHeader = ({ title, summary, category, isSaving, collaborators, onS
     }
 
     if (Object.keys(updatedDetails).length > 0) {
-      console.log('first')
       onSave({ updatedDetails });
-      console.log('second')
     }
   };
+
+  useEffect(() => {
+    setLocalTitle(title)
+    setLocalSummary(summary)
+  }, [title, summary])
 
   return (
     <div className="sticky top-0 z-20 bg-card border-b px-6 pb-2 flex justify-between items-center sm:items-start sm:flex-row flex-col gap-2">

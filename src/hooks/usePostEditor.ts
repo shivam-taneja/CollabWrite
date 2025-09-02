@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
 import Color from '@tiptap/extension-color';
@@ -28,6 +28,8 @@ lowlight.register('css', css);
 lowlight.register('html', xml);
 
 export function usePostEditor(content?: string, postId?: string) {
+  const initialContentRef = useRef(content ?? '');
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -52,15 +54,36 @@ export function usePostEditor(content?: string, postId?: string) {
   } = useUpdatePostDetailsById()
 
   const save = async ({ updatedDetails }: { updatedDetails: Partial<UpdatePostDetails> }) => {
-    if (!editor || !postId) return;
+    if (!editor || !postId)
+      return;
+
+    const payload: Partial<UpdatePostDetails> = { ...updatedDetails };
 
     const html = editor.getHTML();
+
+    // Only include content if it changed
+    if (html !== initialContentRef.current) {
+      payload.content = html;
+    }
+
+    // If nothing changed, skip request
+    if (Object.keys(payload).length === 0) {
+      toast.info('No changes to save');
+      return;
+    }
 
     try {
       await mutateAsync({
         postId,
         updatedDetails
       });
+
+      // Update reference so future saves only detect new changes
+      if (payload.content !== undefined) {
+        initialContentRef.current = payload.content;
+      }
+
+      toast.success('Post saved!');
     } catch (err) {
       toast.error('Error saving post');
     }

@@ -2,12 +2,18 @@
 
 import { useParams } from 'next/navigation';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { EditorContent } from '@tiptap/react';
 
+import { client } from '@/lib/appwrite-client';
+import db from '@/lib/db';
+import { useQueryClient } from '@tanstack/react-query';
+
 import { useGetPostDetailsById } from '@/hooks/api/post/useGetPostDetailsById';
 import { usePostEditor } from '@/hooks/usePostEditor';
+
+import { PostDB } from '@/types/post';
 
 import NotFoundPage from '@/app/not-found';
 import EditPostHeader from '@/components/post/edit/post-header';
@@ -23,12 +29,48 @@ const PostEditPage = () => {
     data: post,
     isLoading,
     isFetching,
-    isError
+    isError,
   } = useGetPostDetailsById({
     postId,
   });
-
+  const queryClient = useQueryClient();
   const { editor, save, isSaving } = usePostEditor(post?.content, post?.$id)
+
+  useEffect(() => {
+    if (!post)
+      return;
+
+    const unsubscribe = client.subscribe(
+      `databases.${db.dbID}.tables.${db.posts}.rows.${post.$id}`,
+      (event) => {
+        if (event.events.includes('databases.*.tables.*.rows.*.update')) {
+          const updatedDoc = event.payload as PostDB;
+
+          if (editor && updatedDoc.content && updatedDoc.content !== editor.getHTML()) {
+            editor.commands.setContent(updatedDoc.content);
+          }
+
+          queryClient.setQueryData(["post-details", post.$id], (old: any) => {
+            if (!old)
+              return updatedDoc;
+
+            return {
+              ...old,
+              title: updatedDoc.title,
+              summary: updatedDoc.summary,
+              content: updatedDoc.content,
+              category: updatedDoc.category,
+              postCollaborators: old.postCollaborators,
+            };
+          });
+        }
+      }
+    );
+
+    return () => {
+      unsubscribe();
+    };
+  }, [post]);
 
   if (isLoading || isFetching) {
     return <Loading />;
@@ -37,7 +79,6 @@ const PostEditPage = () => {
   if (isError || !post) {
     return <NotFoundPage />;
   }
-
 
   return (
     <div className="container mx-auto px-4">
