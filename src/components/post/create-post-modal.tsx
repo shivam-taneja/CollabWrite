@@ -72,7 +72,7 @@ function CreatePostModal({ children }: { children: ReactNode }) {
       const response = await mutateAsync({ title: values.title })
 
       if (response.success && response.data) {
-        router.push(`/my-posts`);
+        router.push(`/post/${response.data.$id}/edit`);
       }
     } catch (err) {
       toast.error("Someting went wrong!")
