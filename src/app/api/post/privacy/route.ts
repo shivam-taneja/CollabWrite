@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { Databases, Query } from "node-appwrite";
+import { Query, TablesDB } from "node-appwrite";
 
 import { requireUser } from "@/lib/auth";
 import db from "@/lib/db";
 import { updatePostPrivacySchema } from "@/schema/post";
 
 import { ApiResponse } from "@/core/api/types";
+import { PostDB } from "@/types/post";
 
 export async function PATCH(req: NextRequest) {
   try {
@@ -26,9 +27,9 @@ export async function PATCH(req: NextRequest) {
     if (error)
       return error;
 
-    const databases = new Databases(userClient);
+    const tables = new TablesDB(userClient);
 
-    const ownerCheck = await databases.listDocuments(
+    const ownerCheck = await tables.listRows(
       db.dbID,
       db.postCollaborators,
       [
@@ -38,14 +39,14 @@ export async function PATCH(req: NextRequest) {
       ]
     );
 
-    if (ownerCheck.documents.length === 0) {
+    if (ownerCheck.total === 0) {
       return NextResponse.json<ApiResponse>(
         { success: false, error: "Forbidden" },
         { status: 403 }
       );
     }
 
-    const postDoc = await databases.getDocument(db.dbID, db.posts, postId);
+    const postDoc = await tables.getRow<PostDB>(db.dbID, db.posts, postId);
 
     if (postDoc.isPrivate === privacySetting) {
       return NextResponse.json<ApiResponse>(
@@ -59,7 +60,7 @@ export async function PATCH(req: NextRequest) {
       );
     }
 
-    await databases.updateDocument(db.dbID, db.posts, postId, {
+    await tables.updateRow(db.dbID, db.posts, postId, {
       isPrivate: privacySetting,
     });
 

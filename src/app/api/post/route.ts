@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { Databases, ID, Permission, Role } from "node-appwrite";
+import { ID, Permission, Role, TablesDB } from "node-appwrite";
 
 import { requireUser } from "@/lib/auth";
 import db from "@/lib/db";
@@ -27,9 +27,9 @@ export async function POST(req: NextRequest) {
     if (error)
       return error;
 
-    const databases = new Databases(userClient);
+    const tables = new TablesDB(userClient);
 
-    const post = await databases.createDocument(
+    const post = await tables.createRow(
       db.dbID,
       db.posts,
       ID.unique(),
@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
     );
 
     try {
-      await databases.createDocument(
+      await tables.createRow(
         db.dbID,
         db.postCollaborators,
         ID.unique(),
@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
       });
     } catch (err) {
       // Rollback if collaborator creation fails
-      await databases.deleteDocument(db.dbID, db.posts, post.$id);
+      await tables.deleteRow(db.dbID, db.posts, post.$id);
 
       return NextResponse.json<ApiResponse>(
         { success: false, error: "Failed to create collaborator" },

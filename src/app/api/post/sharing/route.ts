@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { Databases, Query } from "node-appwrite";
+import { Query, TablesDB } from "node-appwrite";
 
 import { requireUser } from "@/lib/auth";
 import db from "@/lib/db";
@@ -27,9 +27,9 @@ export async function DELETE(req: NextRequest) {
     if (error)
       return error;
 
-    const databases = new Databases(userClient);
+    const tables = new TablesDB(userClient);
 
-    const ownerCheck = await databases.listDocuments(
+    const ownerCheck = await tables.listRows(
       db.dbID,
       db.postCollaborators,
       [
@@ -46,7 +46,7 @@ export async function DELETE(req: NextRequest) {
       );
     }
 
-    const editorDocs = await databases.listDocuments(
+    const editorDocs = await tables.listRows(
       db.dbID,
       db.postCollaborators,
       [
@@ -55,9 +55,9 @@ export async function DELETE(req: NextRequest) {
       ]
     );
 
-    for (const editor of editorDocs.documents) {
-      await databases.deleteDocument(db.dbID, db.postCollaborators, editor.$id);
-    }
+    await Promise.all(
+      editorDocs.rows.map(editor => tables.deleteRow(db.dbID, db.postCollaborators, editor.$id))
+    )
 
     return NextResponse.json<ApiResponse<{ stoppedSharing: true }>>({
       success: true,
