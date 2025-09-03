@@ -20,9 +20,8 @@ export interface PostCollaboratorDB extends Models.Row {
 export type PostCollaboratorsRole = 'owner' | 'editor'
 
 export interface PostCollaboratorsEditorDetails
-  extends Pick<PostCollaboratorDB, "role"> {
+  extends Pick<PostCollaboratorDB, "role" | "displayName"> {
   $id: string,
-  name: string,
   email: string,
 }
 

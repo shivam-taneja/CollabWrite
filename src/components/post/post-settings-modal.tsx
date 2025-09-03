@@ -180,12 +180,12 @@ const PostSettingsModal = ({
                               <div className="flex items-center gap-3">
                                 <Avatar className="h-8 w-8">
                                   <AvatarFallback>
-                                    {c.name?.[0]?.toUpperCase() ?? "U"}
+                                    {c.displayName}
                                   </AvatarFallback>
                                 </Avatar>
 
                                 <div>
-                                  <p className="text-sm font-medium">{c.name}</p>
+                                  <p className="text-sm font-medium">{c.displayName}</p>
                                   <p className="text-xs text-muted-foreground">{c.email}</p>
                                   <p className="text-xs font-semibold text-purple-500 capitalize">{c.role}</p>
                                 </div>

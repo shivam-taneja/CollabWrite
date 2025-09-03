@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Client, Databases, ID, Query, Users } from "node-appwrite";
+import { Client, ID, Query, TablesDB, Users } from "node-appwrite";
 
 import { requireUser } from "@/lib/auth";
 import db from "@/lib/db";
 import { addPostCollaboratorSchema, postIdSchema, removePostCollaboratorSchema } from "@/schema/post";
 
 import { ApiResponse } from "@/core/api/types";
-import { PostCollaboratorsEditorDetails } from "@/types/post";
+import { PostCollaboratorDB, PostCollaboratorsEditorDetails } from "@/types/post";
 
 export async function GET(req: NextRequest) {
   try {
@@ -27,22 +27,22 @@ export async function GET(req: NextRequest) {
     if (error)
       return error;
 
-    const dbClient = new Databases(userClient);
+    const tables = new TablesDB(userClient);
 
-    const ownerCheck = await dbClient.listDocuments(db.dbID, db.postCollaborators, [
+    const ownerCheck = await tables.listRows(db.dbID, db.postCollaborators, [
       Query.equal("userId", userId),
       Query.equal("posts", postId),
       Query.equal("role", "owner"),
     ]);
 
-    if (ownerCheck.documents.length === 0) {
+    if (ownerCheck.total === 0) {
       return NextResponse.json<ApiResponse>(
         { success: false, error: "Forbidden" },
         { status: 403 }
       );
     }
 
-    const editors = await dbClient.listDocuments(db.dbID, db.postCollaborators, [
+    const editors = await tables.listRows<PostCollaboratorDB>(db.dbID, db.postCollaborators, [
       Query.equal("posts", postId),
       Query.equal("role", "editor"),
     ]);
@@ -55,20 +55,20 @@ export async function GET(req: NextRequest) {
     const users = new Users(serverClient);
 
     const editorDetails: PostCollaboratorsEditorDetails[] = await Promise.all(
-      editors.documents.map(async (c: any) => {
+      editors.rows.map(async (c: any) => {
         try {
           const user = await users.get(c.userId);
 
           return {
             $id: user.$id,
-            name: user.name,
+            displayName: user.name,
             email: user.email,
             role: c.role,
           };
         } catch (err) {
           return {
             $id: c.userId,
-            name: 'Unkown User',
+            displayName: 'Unkown User',
             email: "Unkown User",
             role: c.role,
           };
@@ -107,9 +107,9 @@ export async function POST(req: NextRequest) {
     if (error)
       return error;
 
-    const databases = new Databases(userClient);
+    const tables = new TablesDB(userClient);
 
-    const ownerCheck = await databases.listDocuments(
+    const ownerCheck = await tables.listRows(
       db.dbID,
       db.postCollaborators,
       [
@@ -119,7 +119,7 @@ export async function POST(req: NextRequest) {
       ]
     );
 
-    if (ownerCheck.documents.length === 0) {
+    if (ownerCheck.total === 0) {
       return NextResponse.json<ApiResponse>(
         { success: false, error: "Forbidden" },
         { status: 403 }
@@ -161,7 +161,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    await databases.createDocument(
+    await tables.createRow(
       db.dbID,
       db.postCollaborators,
       ID.unique(),
@@ -206,9 +206,9 @@ export async function DELETE(req: NextRequest) {
     if (error)
       return error;
 
-    const databases = new Databases(userClient);
+    const tables = new TablesDB(userClient);
 
-    const ownerCheck = await databases.listDocuments(
+    const ownerCheck = await tables.listRows(
       db.dbID,
       db.postCollaborators,
       [
@@ -218,7 +218,7 @@ export async function DELETE(req: NextRequest) {
       ]
     );
 
-    if (ownerCheck.documents.length === 0) {
+    if (ownerCheck.total === 0) {
       return NextResponse.json<ApiResponse>(
         { success: false, error: "Forbidden" },
         { status: 403 }
@@ -232,7 +232,7 @@ export async function DELETE(req: NextRequest) {
       );
     }
 
-    const collaboratorDocs = await databases.listDocuments(
+    const collaboratorDocs = await tables.listRows(
       db.dbID,
       db.postCollaborators,
       [
@@ -249,9 +249,9 @@ export async function DELETE(req: NextRequest) {
       );
     }
 
-    const collaboratorDoc = collaboratorDocs.documents[0];
+    const collaboratorDoc = collaboratorDocs.rows[0];
 
-    await databases.deleteDocument(
+    await tables.deleteRow(
       db.dbID,
       db.postCollaborators,
       collaboratorDoc.$id

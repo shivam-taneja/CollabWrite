@@ -57,7 +57,7 @@ const RemovePostCollaboratorAlert = ({
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
-            Remove collaborator {collaboratorToRemove?.name}?
+            Remove collaborator {collaboratorToRemove?.displayName}?
           </AlertDialogTitle>
           <AlertDialogDescription>
             This will remove
