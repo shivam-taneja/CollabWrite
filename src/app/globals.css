@@ -1,7 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-@plugin "@tailwindcss/typography"; 
 @import 'highlight.js/styles/github-dark.css';
 
 @custom-variant dark (&:is(.dark *));
@@ -70,7 +69,7 @@
 }
 
 @layer utilities {
-  @media (width <= 640px) {
+  @media (width <=640px) {
     .container {
       max-width: 100% !important;
     }
@@ -213,20 +212,66 @@
   background: var(--gradient-primary) !important;
 }
 
-.prose pre {
-  background: #1e1e1e; /* dark background */
-  color: #e5e5e5; /* default text color */
-  padding: 1rem;
-  border-radius: 0.5rem;
-  overflow-x: auto;
-  font-size: 0.9rem;
-  line-height: 1.5;
+.code-block {
+  @apply bg-[#f9f9f9] text-[#383a42] rounded-2xl text-left my-2;
 }
 
-/* Ensure inline <code> looks different */
-.prose code {
-  background: rgba(240, 240, 240, 0.1);
-  padding: 0.2rem 0.4rem;
-  border-radius: 0.25rem;
-  font-size: 0.85rem;
+.code-block-header {
+  @apply text-[#5d5d5d] py-2 px-4 text-xs select-none font-sans;
+}
+
+.prose pre {
+  @apply px-4 pb-2;
+}
+
+.prose p {
+  margin-block: calc(var(--spacing) * 2);
+}
+
+.prose hr {
+  border-top-width: 1px;
+  margin-bottom: 1rem;
+  margin-top: 1rem;
+}
+
+.prose strong {
+  @apply font-semibold
+}
+
+.prose :not(pre)>code {
+  @apply bg-gray-100 text-[#0d0d0d] rounded-lg py-1 px-1;
+}
+
+.prose h1,
+h2,
+h3 {
+  @apply mt-1 mb-2 font-semibold
+}
+
+.prose h1 {
+  @apply text-2xl tracking-normal
+}
+
+.prose h2 {
+  @apply text-xl
+}
+
+.prose h3 {
+  @apply text-lg
+}
+
+.prose ul, ol {
+  padding-inline-start: 1.625rem;
+}
+
+.prose ul {
+  list-style-type: disc;
+}
+
+.prose li {
+  padding-inline-start: 0.5rem;
+}
+
+.prose ol {
+  list-style-type: decimal;
 }

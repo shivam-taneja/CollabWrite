@@ -23,12 +23,13 @@ interface Props {
 const EditPostHeader = ({ form, category, collaborators, onSave, isSaving, isDirty, }: Props) => {
   const { control, handleSubmit } = form;
 
+  // TODO: add option to update category
   return (
     <form
       onSubmit={handleSubmit(onSave)}
-      className="sticky top-0 z-20 bg-card border-b px-6 pb-2 flex justify-between items-center sm:items-start sm:flex-row flex-col gap-2"
+      className="z-20 bg-card border-b px-6 pb-2 flex justify-between items-start [@media(min-width:480px)]:items-start [@media(min-width:480px)]:flex-row flex-col gap-2"
     >
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2 w-full [@media(min-width:480px)]:w-auto">
         <Controller
           name="title"
           control={control}
@@ -55,7 +56,7 @@ const EditPostHeader = ({ form, category, collaborators, onSave, isSaving, isDir
         />
       </div>
 
-      <div className="flex items-center gap-2 w-full sm:w-auto">
+      <div className="flex items-center gap-2 w-full [@media(min-width:480px)]:w-auto">
         {collaborators.map((c) => (
           <Tooltip key={c}>
             <TooltipTrigger asChild>

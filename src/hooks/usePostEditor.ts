@@ -2,17 +2,19 @@
 
 import { useEffect, useRef, useState } from 'react';
 
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 
-import { zodResolver } from '@hookform/resolvers/zod';
+import { ReactNodeViewRenderer, useEditor } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
+
+import Blockquote from "@tiptap/extension-blockquote";
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
 import Color from '@tiptap/extension-color';
 import Highlight from '@tiptap/extension-highlight';
 import Link from '@tiptap/extension-link';
 import { TextStyle } from '@tiptap/extension-text-style';
 import Underline from '@tiptap/extension-underline';
-import { useEditor } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
 
 import css from 'highlight.js/lib/languages/css';
 import javascript from 'highlight.js/lib/languages/javascript';
@@ -26,6 +28,9 @@ import { updatePostSchema, UpdatePostSchemaT } from '@/schema/post';
 
 import { useUpdatePost } from './api/post/useUpdatePost';
 
+import BlockQuoteComponent from '@/components/post/edit/tiptap/block-quote';
+import CodeBlockComponent from '@/components/post/edit/tiptap/code-block';
+
 import { PostDetails } from '@/types/post';
 import { toast } from 'react-toastify';
 
@@ -37,7 +42,7 @@ lowlight.register('html', xml);
 
 export function usePostEditor(post: PostDetails) {
   const { $id, content, title, summary, category } = post
-  const initialContentRef = useRef(content ?? '');
+  const initialContentRef = useRef(content);
 
   const [isContentDirty, setIsContentDirty] = useState(false);
 
@@ -59,11 +64,27 @@ export function usePostEditor(post: PostDetails) {
     extensions: [
       StarterKit.configure({ codeBlock: false, link: false, underline: false }),
       Underline,
-      Link,
+      Link, // TODO: add link support
       TextStyle,
       Color,
-      Highlight,
-      CodeBlockLowlight.configure({ lowlight })
+      Highlight.configure({ multicolor: true }),
+      CodeBlockLowlight.extend({
+        addAttributes() {
+          return {
+            language: {
+              default: "plaintext",
+            }
+          }
+        },
+        addNodeView() {
+          return ReactNodeViewRenderer(CodeBlockComponent)
+        },
+      }).configure({ lowlight }),
+      Blockquote.extend({
+        addNodeView() {
+          return ReactNodeViewRenderer(BlockQuoteComponent)
+        },
+      })
     ],
     content,
     immediatelyRender: false,
