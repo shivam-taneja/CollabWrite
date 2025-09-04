@@ -26,6 +26,7 @@ export interface PostCollaboratorsEditorDetails
 }
 
 export interface PostPermissions {
+  collaboratorRowId: string | null,
   role: PostCollaboratorsRole,
   canEdit: boolean,
   canUpdate: boolean

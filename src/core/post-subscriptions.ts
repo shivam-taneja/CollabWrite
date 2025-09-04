@@ -29,3 +29,18 @@ export function subscribeToPostDetails(
 
   return unsubscribe;
 }
+
+export function subscribeToPostCollaborator(
+  queryClient: QueryClient,
+  postId: string,
+  collaboratorRowId: string
+) {
+  const unsubscribe = client.subscribe(
+    `databases.${db.dbID}.tables.${db.postCollaborators}.rows.${collaboratorRowId}`,
+    () => {
+      queryClient.invalidateQueries({ queryKey: ["post-details", postId] });
+    }
+  );
+
+  return unsubscribe;
+}

@@ -180,7 +180,7 @@ const PostSettingsModal = ({
                               <div className="flex items-center gap-3">
                                 <Avatar className="h-8 w-8">
                                   <AvatarFallback>
-                                    {c.displayName}
+                                    {c.displayName[0]}
                                   </AvatarFallback>
                                 </Avatar>
 

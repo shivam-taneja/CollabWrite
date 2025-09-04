@@ -33,6 +33,7 @@ export async function GET(
     }
 
     let viewerRole: PostCollaboratorsRole = 'viewer';
+    let collaboratorRowId: string | null = null;
 
     if (loggedInUserId) {
       const collab = await tables.listRows<PostCollaboratorDB>(
@@ -49,6 +50,7 @@ export async function GET(
       if (collab.rows.length > 0) {
         // user is owner or editor
         viewerRole = collab.rows[0].role;
+        collaboratorRowId = collab.rows[0].$id;
       } else if (post.isPrivate) {
         // logged in but not collaborator -> block
         return notFound("Post not found")
@@ -92,6 +94,7 @@ export async function GET(
         collaborators: editorNames,
       },
       permissions: {
+        collaboratorRowId,
         role: viewerRole,
         canEdit: viewerRole !== "viewer",
         canUpdate: viewerRole === "owner",
