@@ -1,14 +1,14 @@
-import { NextResponse } from "next/server";
+import { Query } from "node-appwrite";
 
-import { Client, Query, TablesDB, Users } from "node-appwrite";
-
+import { jsonError, jsonOk, serverError } from "@/lib/api-responses";
 import db from "@/lib/db";
+
 import { backendFeedSearchSchema } from "@/schema/feed";
 
-import { ApiResponse } from "@/core/api/types";
 import { FeedData } from "@/types/feed";
 import { PostCollaboratorDB, PostDB } from "@/types/post";
 
+import { tables } from "@/lib/appwrite-server";
 import { FEED_LIMIT } from "@/utils/constants";
 
 type PostResultDB = PostDB & {
@@ -20,30 +20,19 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const homepageHeader = req.headers.get("x-homepage-request");
 
-    const parsedDefaults = backendFeedSearchSchema.safeParse({
+    const parsed = backendFeedSearchSchema.safeParse({
       search: searchParams.get('search') || undefined,
       category: searchParams.get('category') || undefined,
       offset: Number(searchParams.get('offset')),
     });
 
-    if (!parsedDefaults.success) {
-      return NextResponse.json<ApiResponse>(
-        { success: false, error: `Invalid Search Params: ${parsedDefaults.error.message}` },
-        { status: 400 }
-      );
+    if (!parsed.success) {
+      return jsonError(parsed.error.message)
     }
 
-    const search = parsedDefaults.data.search;
-    const category = parsedDefaults.data.category;
-    const offset = parsedDefaults.data.offset;
-
-    const client = new Client()
-      .setEndpoint(process.env.APPWRITE_ENDPOINT!)
-      .setProject(process.env.APPWRITE_PROJECT_ID!)
-      .setKey(process.env.APPWRITE_API_KEY!);
-
-    const tables = new TablesDB(client);
-    const users = new Users(client);
+    const search = parsed.data.search;
+    const category = parsed.data.category;
+    const offset = parsed.data.offset;
 
     const limit = homepageHeader === "true" ? 3 : FEED_LIMIT;
 
@@ -97,15 +86,9 @@ export async function GET(req: Request) {
       totalPages,
     };
 
-    return NextResponse.json<ApiResponse<FeedData>>({
-      success: true,
-      data: payload,
-    });
+    return jsonOk(payload)
   } catch (err) {
     console.error("Error fetching public feed: ", err);
-    return NextResponse.json<ApiResponse>(
-      { success: false, error: "Failed to fetch feed" },
-      { status: 500 }
-    );
+    return serverError("Failed to fetch feed")
   }
 }

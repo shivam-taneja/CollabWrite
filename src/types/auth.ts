@@ -15,6 +15,7 @@ export interface AuthState {
     setUser: (user: AuthUser | null) => void;
     logout: () => void;
     getValidJwt: () => Promise<string>;
+    getJwtIfValid: () => string | null;
   }
 }
 

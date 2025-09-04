@@ -1,13 +1,12 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 
 import { ID, Permission, Role, TablesDB } from "node-appwrite";
 
+import { jsonError, jsonOk, serverError } from "@/lib/api-responses";
 import { requireUser } from "@/lib/auth";
 import db from "@/lib/db";
-import { createPostSchema } from "@/schema/post";
 
-import { ApiResponse } from "@/core/api/types";
-import { CreatePostResult } from "@/types/post";
+import { createPostSchema } from "@/schema/post";
 
 export async function POST(req: NextRequest) {
   try {
@@ -15,10 +14,7 @@ export async function POST(req: NextRequest) {
 
     const parsed = createPostSchema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json<ApiResponse>(
-        { success: false, error: `Invalid body: ${parsed.error.message}` },
-        { status: 400 }
-      );
+      return jsonError(parsed.error.message)
     }
 
     const { title } = parsed.data;
@@ -65,24 +61,16 @@ export async function POST(req: NextRequest) {
         ]
       );
 
-      return NextResponse.json<ApiResponse<CreatePostResult>>({
-        success: true,
-        data: { $id: post.$id },
-      });
+      return jsonOk({ $id: post.$id })
     } catch (err) {
       // Rollback if collaborator creation fails
       await tables.deleteRow(db.dbID, db.posts, post.$id);
 
-      return NextResponse.json<ApiResponse>(
-        { success: false, error: "Failed to create collaborator" },
-        { status: 500 }
-      );
+      return serverError("Failed to create collaborator while creating post")
     }
   } catch (err) {
     console.error("Error creating post: ", err);
-    return NextResponse.json<ApiResponse>(
-      { success: false, error: "Failed to create post" },
-      { status: 500 }
-    );
+
+    return serverError("Failed to create post")
   }
 }

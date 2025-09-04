@@ -1,12 +1,13 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 
 import { Query, TablesDB } from "node-appwrite";
 
+import { jsonError, jsonOk, serverError } from "@/lib/api-responses";
 import { requireUser } from "@/lib/auth";
 import db from "@/lib/db";
+
 import { updatePostPrivacySchema } from "@/schema/post";
 
-import { ApiResponse } from "@/core/api/types";
 import { PostDB } from "@/types/post";
 
 export async function PATCH(req: NextRequest) {
@@ -15,10 +16,7 @@ export async function PATCH(req: NextRequest) {
     const parsed = updatePostPrivacySchema.safeParse(body);
 
     if (!parsed.success) {
-      return NextResponse.json<ApiResponse>(
-        { success: false, error: parsed.error.message },
-        { status: 400 }
-      );
+      return jsonError(parsed.error.message)
     }
 
     const { postId, privacySetting } = parsed.data;
@@ -40,39 +38,22 @@ export async function PATCH(req: NextRequest) {
     );
 
     if (ownerCheck.total === 0) {
-      return NextResponse.json<ApiResponse>(
-        { success: false, error: "Forbidden" },
-        { status: 403 }
-      );
+      return jsonError("Forbidden: You don't have access", 403)
     }
 
     const postDoc = await tables.getRow<PostDB>(db.dbID, db.posts, postId);
 
     if (postDoc.isPrivate === privacySetting) {
-      return NextResponse.json<ApiResponse>(
-        {
-          success: false,
-          error: privacySetting
-            ? "Post is already private"
-            : "Post is already public",
-        },
-        { status: 400 }
-      );
+      return jsonError(privacySetting ? "Post is already private" : "Post is  public")
     }
 
     await tables.updateRow(db.dbID, db.posts, postId, {
       isPrivate: privacySetting,
     });
 
-    return NextResponse.json<ApiResponse<{ updated: true }>>({
-      success: true,
-      data: { updated: true },
-    });
+    return jsonOk({ updateData: true })
   } catch (err) {
     console.error("Error updating post privacy: ", err);
-    return NextResponse.json<ApiResponse>(
-      { success: false, error: "Failed to update post privacy" },
-      { status: 500 }
-    );
+    return serverError("Failed to update post privacy settings")
   }
 }

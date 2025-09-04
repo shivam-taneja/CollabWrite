@@ -1,10 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
+
 import { Query, TablesDB } from "node-appwrite";
 
+import { jsonOk, serverError } from "@/lib/api-responses";
 import { requireUser } from "@/lib/auth";
 import db from "@/lib/db";
 
-import { ApiResponse } from "@/core/api/types";
 import { UserPost, UserPostsSection } from "@/types/user";
 
 export async function GET(req: NextRequest) {
@@ -55,19 +56,13 @@ export async function GET(req: NextRequest) {
       fetchPostsByRole("editor"),
     ]);
 
-    return NextResponse.json<ApiResponse>({
-      success: true,
-      data: {
-        owner,
-        editor,
-        totalPosts: owner.total + editor.total
-      },
-    });
+    return jsonOk({
+      owner,
+      editor,
+      totalPosts: owner.total + editor.total
+    })
   } catch (err) {
     console.error("Error fetching user posts: ", err);
-    return NextResponse.json<ApiResponse>(
-      { success: false, error: "Failed to fetch user posts" },
-      { status: 500 }
-    );
+    return serverError("Failed to fetch user posts")
   }
 }

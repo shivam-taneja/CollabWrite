@@ -1,13 +1,13 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 
 import { Account, Client } from "node-appwrite";
 
-import { ApiResponse } from "@/core/api/types";
+import { jsonError } from "./api-responses";
 
 export async function requireUser(req: NextRequest) {
   const authHeader = req.headers.get("authorization");
   if (!authHeader) {
-    return { error: NextResponse.json<ApiResponse>({ success: false, error: "Unauthorized" }, { status: 401 }) };
+    return { error: jsonError("Unauthorized: No token found", 401) };
   }
 
   const jwt = authHeader.split(" ")[1];
@@ -21,6 +21,6 @@ export async function requireUser(req: NextRequest) {
     const userDetails = await account.get();
     return { userId: userDetails.$id, userDetails, userClient };
   } catch {
-    return { error: NextResponse.json<ApiResponse>({ success: false, error: "Invalid or expired token" }, { status: 401 }) };
+    return { error: jsonError("Unauthorized: Invalid or expired token", 401) };
   }
 }

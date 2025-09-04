@@ -3,8 +3,8 @@ import { persist } from 'zustand/middleware';
 
 import CryptoJS from 'crypto-js';
 
-import { AuthState } from '@/types/auth';
 import { account } from '@/lib/appwrite-client';
+import { AuthState } from '@/types/auth';
 
 const SECRET_KEY = process.env.NEXT_PUBLIC_STORAGE_KEY || "fallback-secret";
 
@@ -48,6 +48,13 @@ const useAuthStore = create<AuthState>()(
           set({ jwt: res.jwt, jwtExpiry: expiry });
 
           return res.jwt;
+        },
+
+        getJwtIfValid: () => {
+          const { jwt, jwtExpiry } = get();
+          const now = Date.now();
+
+          return jwt && jwtExpiry && now < jwtExpiry ? jwt : null;
         },
       }
     }),

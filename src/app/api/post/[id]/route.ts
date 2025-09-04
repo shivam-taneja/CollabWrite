@@ -1,14 +1,15 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 
-import { AppwriteException, Client, Query, TablesDB, Users } from "node-appwrite";
+import { AppwriteException, Query, TablesDB } from "node-appwrite";
 
-import { ApiResponse } from "@/core/api/types";
+import { jsonError, jsonOk, notFound, serverError } from "@/lib/api-responses";
+import { tables } from "@/lib/appwrite-server";
 import { requireUser } from "@/lib/auth";
 import db from "@/lib/db";
 
 import { deletePostSchema, updatePostSchema } from "@/schema/post";
 
-import { PostCollaboratorDB, PostDB, PostDetails } from "@/types/post";
+import { PostCollaboratorDB, PostCollaboratorsRole, PostDB, PostDetails } from "@/types/post";
 
 export async function GET(
   req: NextRequest,
@@ -20,55 +21,41 @@ export async function GET(
     const { userId, error } = await requireUser(req);
     const loggedInUserId = !!error ? null : userId;
 
-    const client = new Client()
-      .setEndpoint(process.env.APPWRITE_ENDPOINT!)
-      .setProject(process.env.APPWRITE_PROJECT_ID!)
-      .setKey(process.env.APPWRITE_API_KEY!);
-
-    const tables = new TablesDB(client);
-    const users = new Users(client);
-
     let post: PostDB;
     try {
       post = await tables.getRow<PostDB>(db.dbID, db.posts, id);
     } catch (err) {
       if (err instanceof AppwriteException && err.code === 404) {
-        return NextResponse.json<ApiResponse>(
-          { success: false, error: "Post not found" },
-          { status: 404 }
-        );
+        return notFound("Post not found")
       }
       // rethrow unexpected errors
       throw err;
     }
 
-    if (post.isPrivate) {
-      if (!loggedInUserId) {
-        // case 1: not logged in
-        return NextResponse.json<ApiResponse>(
-          { success: false, error: "Post not found" },
-          { status: 404 }
-        );
-      }
+    let viewerRole: PostCollaboratorsRole = 'viewer';
 
-      // case 2: logged in → check collab table for this user
+    if (loggedInUserId) {
       const collab = await tables.listRows<PostCollaboratorDB>(
         db.dbID,
         db.postCollaborators,
         [
           Query.equal("posts", id),
           Query.equal("userId", loggedInUserId),
-          Query.select(["userId", "role"]),
+          Query.select(["role"]),
+          Query.limit(1),
         ]
       );
 
-      if (collab.rows.length === 0) {
-        // not a collaborator
-        return NextResponse.json<ApiResponse>(
-          { success: false, error: "Post not found" },
-          { status: 404 }
-        );
+      if (collab.rows.length > 0) {
+        // user is owner or editor
+        viewerRole = collab.rows[0].role;
+      } else if (post.isPrivate) {
+        // logged in but not collaborator -> block
+        return notFound("Post not found")
       }
+    } else if (post.isPrivate) {
+      // not logged in + private post
+      return notFound("Post not found")
     }
 
     const collaborators = await tables.listRows<PostCollaboratorDB>(
@@ -80,22 +67,17 @@ export async function GET(
       ]
     );
 
+
     let ownerName = "Unknown User";
     const editorNames: string[] = [];
 
-    await Promise.all(collaborators.rows.map(async (collab) => {
-      try {
-        if (collab.role === "owner")
-          ownerName = collab.displayName;
-        else if (collab.role === "editor")
-          editorNames.push(collab.displayName);
-      } catch {
-        if (collab.role === "owner")
-          ownerName = "Unknown User";
-        else if (collab.role === "editor")
-          editorNames.push("Unknown User");
-      }
-    }));
+    for (const c of collaborators.rows) {
+      const name = c.displayName ?? "Unknown User";
+      if (c.role === "owner")
+        ownerName = name;
+      else if (c.role === "editor")
+        editorNames.push(name);
+    }
 
     const payload: PostDetails = {
       $id: post.$id,
@@ -109,18 +91,17 @@ export async function GET(
         owner: ownerName,
         collaborators: editorNames,
       },
+      permissions: {
+        role: viewerRole,
+        canEdit: viewerRole !== "viewer",
+        canUpdate: viewerRole === "owner",
+      },
     };
 
-    return NextResponse.json<ApiResponse<PostDetails>>({
-      success: true,
-      data: payload,
-    });
+    return jsonOk(payload);
   } catch (err) {
     console.error("Error fetching post details: ", err);
-    return NextResponse.json<ApiResponse>(
-      { success: false, error: "Failed to fetch post details" },
-      { status: 500 }
-    );
+    return serverError("Failed to fetch post details")
   }
 }
 
@@ -132,10 +113,7 @@ export async function PATCH(req: NextRequest, context: { params: Promise<{ id: s
     const parsed = updatePostSchema.safeParse({ ...body, postId: id });
 
     if (!parsed.success) {
-      return NextResponse.json<ApiResponse>(
-        { success: false, error: parsed.error.message },
-        { status: 400 }
-      );
+      return jsonError(parsed.error.message)
     }
 
     const { userId, userClient, error } = await requireUser(req);
@@ -153,24 +131,15 @@ export async function PATCH(req: NextRequest, context: { params: Promise<{ id: s
     ]);
 
     if (collabs.total === 0) {
-      return NextResponse.json<ApiResponse>(
-        { success: false, error: "Forbidden: You don't have access" },
-        { status: 403 }
-      );
+      return jsonError("Forbidden: You don't have access", 403)
     }
 
     await tables.updateRow(db.dbID, db.posts, postId, updateData);
 
-    return NextResponse.json<ApiResponse<{ updated: true }>>({
-      success: true,
-      data: { updated: true },
-    });
+    return jsonOk({ updateData: true })
   } catch (err) {
     console.error("Error updating post: ", err);
-    return NextResponse.json<ApiResponse>(
-      { success: false, error: "Failed to update post" },
-      { status: 500 }
-    );
+    return serverError("Failed to update post")
   }
 }
 
@@ -181,10 +150,7 @@ export async function DELETE(req: NextRequest) {
 
     const parsed = deletePostSchema.safeParse({ postId: searchParamsPostId });
     if (!parsed.success) {
-      return NextResponse.json<ApiResponse>(
-        { success: false, error: parsed.error.message },
-        { status: 400 }
-      );
+      return jsonError(parsed.error.message)
     }
 
     const { postId } = parsed.data;
@@ -202,23 +168,14 @@ export async function DELETE(req: NextRequest) {
     ]);
 
     if (collabs.rows.length === 0) {
-      return NextResponse.json<ApiResponse>(
-        { success: false, error: "Forbidden: You don't have access" },
-        { status: 403 }
-      );
+      return jsonError("Forbidden: You don't have access", 403)
     }
 
     await tables.deleteRow(db.dbID, db.posts, postId);
 
-    return NextResponse.json<ApiResponse<{ deleted: true }>>({
-      success: true,
-      data: { deleted: true },
-    });
+    return jsonOk({ deleted: true })
   } catch (err) {
     console.error("Error deleting post: ", err);
-    return NextResponse.json<ApiResponse>(
-      { success: false, error: "Failed to delete post" },
-      { status: 500 }
-    );
+    return serverError("Failed to update post")
   }
 }

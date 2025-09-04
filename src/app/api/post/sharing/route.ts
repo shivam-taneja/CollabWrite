@@ -1,12 +1,12 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 
 import { Query, TablesDB } from "node-appwrite";
 
+import { jsonError, jsonOk, serverError } from "@/lib/api-responses";
 import { requireUser } from "@/lib/auth";
 import db from "@/lib/db";
-import { postIdSchema } from "@/schema/post";
 
-import { ApiResponse } from "@/core/api/types";
+import { postIdSchema } from "@/schema/post";
 
 export async function DELETE(req: NextRequest) {
   try {
@@ -15,10 +15,7 @@ export async function DELETE(req: NextRequest) {
 
     const parsed = postIdSchema.safeParse({ postId: searchParamsPostId });
     if (!parsed.success) {
-      return NextResponse.json<ApiResponse>(
-        { success: false, error: parsed.error.message },
-        { status: 400 }
-      );
+      return jsonError(parsed.error.message)
     }
 
     const { postId } = parsed.data
@@ -40,10 +37,7 @@ export async function DELETE(req: NextRequest) {
     );
 
     if (ownerCheck.total === 0) {
-      return NextResponse.json<ApiResponse>(
-        { success: false, error: "Forbidden" },
-        { status: 403 }
-      );
+      return jsonError("Forbidden: You don't have access", 403)
     }
 
     const editorDocs = await tables.listRows(
@@ -59,15 +53,9 @@ export async function DELETE(req: NextRequest) {
       editorDocs.rows.map(editor => tables.deleteRow(db.dbID, db.postCollaborators, editor.$id))
     )
 
-    return NextResponse.json<ApiResponse<{ stoppedSharing: true }>>({
-      success: true,
-      data: { stoppedSharing: true },
-    });
+    return jsonOk({ stoppedSharing: true })
   } catch (err) {
     console.error("Error stopping post sharing: ", err);
-    return NextResponse.json<ApiResponse>(
-      { success: false, error: "Failed to stop post sharing" },
-      { status: 500 }
-    );
+    return serverError("Failed to stop post sharing")
   }
 }

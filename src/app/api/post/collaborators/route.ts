@@ -1,11 +1,14 @@
-import { NextRequest, NextResponse } from "next/server";
-import { Client, ID, Query, TablesDB, Users } from "node-appwrite";
+import { NextRequest } from "next/server";
 
+import { ID, Query, TablesDB } from "node-appwrite";
+
+import { jsonError, jsonOk, serverError } from "@/lib/api-responses";
+import { users } from "@/lib/appwrite-server";
 import { requireUser } from "@/lib/auth";
 import db from "@/lib/db";
+
 import { addPostCollaboratorSchema, postIdSchema, removePostCollaboratorSchema } from "@/schema/post";
 
-import { ApiResponse } from "@/core/api/types";
 import { PostCollaboratorDB, PostCollaboratorsEditorDetails } from "@/types/post";
 
 export async function GET(req: NextRequest) {
@@ -15,10 +18,7 @@ export async function GET(req: NextRequest) {
 
     const parsed = postIdSchema.safeParse({ postId: searchParamsPostId });
     if (!parsed.success) {
-      return NextResponse.json<ApiResponse>(
-        { success: false, error: parsed.error.message },
-        { status: 400 }
-      );
+      return jsonError(parsed.error.message)
     }
 
     const { postId } = parsed.data;
@@ -36,23 +36,13 @@ export async function GET(req: NextRequest) {
     ]);
 
     if (ownerCheck.total === 0) {
-      return NextResponse.json<ApiResponse>(
-        { success: false, error: "Forbidden" },
-        { status: 403 }
-      );
+      return jsonError("Forbidden: You don't have access", 403)
     }
 
     const editors = await tables.listRows<PostCollaboratorDB>(db.dbID, db.postCollaborators, [
       Query.equal("posts", postId),
       Query.equal("role", "editor"),
     ]);
-
-    const serverClient = new Client()
-      .setEndpoint(process.env.APPWRITE_ENDPOINT!)
-      .setProject(process.env.APPWRITE_PROJECT_ID!)
-      .setKey(process.env.APPWRITE_API_KEY!);
-
-    const users = new Users(serverClient);
 
     const editorDetails: PostCollaboratorsEditorDetails[] = await Promise.all(
       editors.rows.map(async (c: any) => {
@@ -76,16 +66,10 @@ export async function GET(req: NextRequest) {
       })
     );
 
-    return NextResponse.json<ApiResponse<PostCollaboratorsEditorDetails[]>>({
-      success: true,
-      data: editorDetails,
-    });
+    return jsonOk(editorDetails)
   } catch (err) {
     console.error("Error fetching editor details: ", err);
-    return NextResponse.json<ApiResponse>(
-      { success: false, error: "Failed to fetch editors" },
-      { status: 500 }
-    );
+    return serverError("Failed to fetch editors")
   }
 }
 
@@ -95,10 +79,7 @@ export async function POST(req: NextRequest) {
     const parsed = addPostCollaboratorSchema.safeParse(body);
 
     if (!parsed.success) {
-      return NextResponse.json<ApiResponse>(
-        { success: false, error: parsed.error.message },
-        { status: 400 }
-      );
+      return jsonError(parsed.error.message)
     }
 
     const { postId, email } = parsed.data;
@@ -120,18 +101,8 @@ export async function POST(req: NextRequest) {
     );
 
     if (ownerCheck.total === 0) {
-      return NextResponse.json<ApiResponse>(
-        { success: false, error: "Forbidden" },
-        { status: 403 }
-      );
+      return jsonError("Forbidden: You don't have access", 403)
     }
-
-    const serverClient = new Client()
-      .setEndpoint(process.env.APPWRITE_ENDPOINT!)
-      .setProject(process.env.APPWRITE_PROJECT_ID!)
-      .setKey(process.env.APPWRITE_API_KEY!);
-
-    const users = new Users(serverClient);
 
     let targetUser;
     try {
@@ -140,25 +111,16 @@ export async function POST(req: NextRequest) {
       ]);
 
       if (foundUsers.total === 0) {
-        return NextResponse.json<ApiResponse<{ added: boolean }>>({
-          success: true,
-          data: { added: false },
-        });
+        return jsonOk({ added: true })
       }
 
       targetUser = foundUsers.users[0];
     } catch {
-      return NextResponse.json<ApiResponse<{ added: boolean }>>({
-        success: true,
-        data: { added: false },
-      });
+      return jsonOk({ added: false })
     }
 
     if (targetUser.$id === userId) {
-      return NextResponse.json<ApiResponse>(
-        { success: false, error: "You cannot add yourself as a collaborator" },
-        { status: 400 }
-      );
+      return jsonError("Forbidden: You cannot add yourself as a collaborator", 403)
     }
 
     await tables.createRow(
@@ -173,16 +135,10 @@ export async function POST(req: NextRequest) {
       }
     );
 
-    return NextResponse.json<ApiResponse<{ added: boolean }>>({
-      success: true,
-      data: { added: true },
-    });
+    return jsonOk({ added: true })
   } catch (err) {
     console.error("Error adding collaborator: ", err);
-    return NextResponse.json<ApiResponse>(
-      { success: false, error: "Failed to add collaborator" },
-      { status: 500 }
-    );
+    return serverError("Failed to add collaborator")
   }
 }
 
@@ -194,10 +150,7 @@ export async function DELETE(req: NextRequest) {
 
     const parsed = removePostCollaboratorSchema.safeParse({ postId: searchParamsPostId, collaboratorId: searchParamsCollaboratorId });
     if (!parsed.success) {
-      return NextResponse.json<ApiResponse>(
-        { success: false, error: parsed.error.message },
-        { status: 400 }
-      );
+      return jsonError(parsed.error.message)
     }
 
     const { collaboratorId, postId } = parsed.data
@@ -219,17 +172,11 @@ export async function DELETE(req: NextRequest) {
     );
 
     if (ownerCheck.total === 0) {
-      return NextResponse.json<ApiResponse>(
-        { success: false, error: "Forbidden" },
-        { status: 403 }
-      );
+      return jsonError("Forbidden: You don't have access", 403)
     }
 
     if (collaboratorId === userId) {
-      return NextResponse.json<ApiResponse>(
-        { success: false, error: "Owner cannot be removed from the post" },
-        { status: 400 }
-      );
+      return jsonError("Forbidden: Owner cannot be removed from the post", 403)
     }
 
     const collaboratorDocs = await tables.listRows(
@@ -243,10 +190,7 @@ export async function DELETE(req: NextRequest) {
     );
 
     if (collaboratorDocs.total === 0) {
-      return NextResponse.json<ApiResponse>(
-        { success: false, error: "User is not a collaborator on this post" },
-        { status: 400 }
-      );
+      return jsonError("User is not a collaborator on this post")
     }
 
     const collaboratorDoc = collaboratorDocs.rows[0];
@@ -257,15 +201,9 @@ export async function DELETE(req: NextRequest) {
       collaboratorDoc.$id
     );
 
-    return NextResponse.json<ApiResponse<{ removed: boolean }>>({
-      success: true,
-      data: { removed: true },
-    });
+    return jsonOk({ removed: true })
   } catch (err) {
     console.error("Error removing collaborator: ", err);
-    return NextResponse.json<ApiResponse>(
-      { success: false, error: "Failed to remove collaborator" },
-      { status: 500 }
-    );
+    return serverError("Failed to remove collaborator")
   }
 }

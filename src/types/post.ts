@@ -17,12 +17,18 @@ export interface PostCollaboratorDB extends Models.Row {
   role: PostCollaboratorsRole;
 }
 
-export type PostCollaboratorsRole = 'owner' | 'editor'
+export type PostCollaboratorsRole = 'owner' | 'editor' | 'viewer'
 
 export interface PostCollaboratorsEditorDetails
   extends Pick<PostCollaboratorDB, "role" | "displayName"> {
   $id: string,
   email: string,
+}
+
+export interface PostPermissions {
+  role: PostCollaboratorsRole,
+  canEdit: boolean,
+  canUpdate: boolean
 }
 
 export interface PostDetails
@@ -31,6 +37,7 @@ export interface PostDetails
     owner: string;
     collaborators: string[];
   };
+  permissions: PostPermissions
 }
 
 export type UpdatePostDetails = Pick<PostDB, 'title' | 'content' | 'summary' | 'category'>
