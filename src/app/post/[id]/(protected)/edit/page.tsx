@@ -4,9 +4,10 @@ import React, { useEffect } from 'react';
 
 import { useParams } from 'next/navigation';
 
-import { subscribeToPostCollaborator, subscribeToPostDetails } from '@/core/post-subscriptions';
+import { subscribeToPostActivity, subscribeToPostCollaborator, subscribeToPostDetails } from '@/core/post-subscriptions';
 import { useQueryClient } from '@tanstack/react-query';
 
+import { useGetPostActivity } from '@/hooks/api/post/useGetPostActivity';
 import { useGetPostDetails } from '@/hooks/api/post/useGetPostDetails';
 
 import NotFoundPage from '@/app/not-found';
@@ -27,39 +28,71 @@ const PostEditPage = () => {
     requireAuth: true
   });
 
+  const {
+    data: postActivity
+  } = useGetPostActivity({
+    postId
+  })
+
   useEffect(() => {
     if (!post)
-      return
+      return;
 
     const unsubscribePost = subscribeToPostDetails(queryClient, post.$id);
 
-    let unsubscribeCollab: (() => void) | undefined;
-    if (post.permissions.collaboratorRowId) {
-      unsubscribeCollab = subscribeToPostCollaborator(queryClient, post.$id, post.permissions.collaboratorRowId);
-    }
-
-    queryClient.invalidateQueries({ queryKey: ["post-details", post.$id] });
-
     return () => {
       unsubscribePost?.();
+    };
+  }, [queryClient, post?.$id]);
+
+  useEffect(() => {
+    if (!post?.permissions.collaboratorRowId)
+      return;
+
+    const unsubscribeCollab = subscribeToPostCollaborator(
+      queryClient,
+      post.$id,
+      post.permissions.collaboratorRowId
+    );
+
+    return () => {
       unsubscribeCollab?.();
     };
-  }, [post])
+  }, [queryClient, post?.$id, post?.permissions.collaboratorRowId]);
+
+  useEffect(() => {
+    if (!postActivity)
+      return;
+
+    const unsubscribeActivity = subscribeToPostActivity(queryClient, postActivity.$id);
+
+    return () => {
+      unsubscribeActivity?.();
+    };
+  }, [queryClient, postActivity?.$id]);
+
+  useEffect(() => {
+    if (!post?.$id)
+      return;
+
+    queryClient.invalidateQueries({ queryKey: ["post-details", post.$id] });
+  }, [queryClient, post?.$id]);
+
 
   if (isLoading) {
     return <Loading />;
   }
 
-  if (isError || !post) {
+  if (isError || !post || !postActivity) {
     return <NotFoundPage />;
   }
 
-  if(!post.permissions.canEdit) {
+  if (!post.permissions.canEdit) {
     return <NotFoundPage />
   }
 
   return (
-    <EditPostPage post={post} />
+    <EditPostPage post={post} postActivity={postActivity} />
   );
 };
 

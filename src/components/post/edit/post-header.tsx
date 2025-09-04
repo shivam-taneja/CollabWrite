@@ -1,10 +1,16 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Controller, UseFormReturn } from 'react-hook-form';
 
+import { useUserDetails } from '@/core/auth';
 import { UpdatePostSchemaT } from '@/schema/post';
-import { POST_CATEGORIES, PostCategory, PostDetails } from '@/types/post';
+
+import { useGetPostActivity } from '@/hooks/api/post/useGetPostActivity';
+
+import { ACTIVE_TTL_MS } from '@/utils/constants';
+
+import { POST_CATEGORIES, PostActivityDB, PostCategory, PostUserActivity } from '@/types/post';
 
 import DeletePostModal from '../delete-post-modal';
 import PostSettingsModal from '../post-settings-modal';
@@ -30,28 +36,53 @@ interface Props {
   postId: string,
   isPrivate: boolean,
   category: PostCategory,
-  collaborators: PostDetails['postCollaborators']['collaborators']
   onSave: (data: UpdatePostSchemaT) => void;
   isSaving: boolean;
   isDirty: boolean;
   isOwner: boolean;
+  postActivity: PostActivityDB
 }
 
 const EditPostHeader = ({
   form,
   category,
-  collaborators,
   isPrivate,
   postId,
   onSave,
   isSaving,
   isDirty,
   isOwner,
+  postActivity
 }: Props) => {
   const { control, handleSubmit, setValue, watch } = form;
 
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+
+  const user = useUserDetails();
+  const { refetch } = useGetPostActivity({ postId, queryOptions: { enabled: false } });
+
+  useEffect(() => {
+    const i = setInterval(() => { refetch(); }, 5000);
+    return () => clearInterval(i);
+  }, [refetch]);
+
+  const activeUsers: PostUserActivity[] = useMemo(() => {
+    try {
+      const arr: PostUserActivity[] = JSON.parse(postActivity?.presence || '[]');
+      const now = Date.now();
+      return Array.isArray(arr)
+        ? arr
+          .filter(u => u.userId !== user?.$id)
+          .filter(u => {
+            const t = new Date(u.lastActive).getTime();
+            return Number.isFinite(t) && (now - t) <= ACTIVE_TTL_MS;
+          })
+        : [];
+    } catch {
+      return [];
+    }
+  }, [postActivity?.presence, user?.$id]);
 
   const currentCategory = watch('category') as PostCategory | undefined;
   if (!currentCategory && category) {
@@ -125,15 +156,15 @@ const EditPostHeader = ({
         </div>
 
         <div className="flex items-center gap-2 w-full [@media(min-width:480px)]:w-auto">
-          {collaborators.map((c) => (
-            <Tooltip key={c}>
+          {activeUsers.map((u) => (
+            <Tooltip key={u.userId}>
               <TooltipTrigger asChild>
                 <Avatar className="h-8 w-8 cursor-pointer">
-                  <AvatarFallback>{c[0]}</AvatarFallback>
+                  <AvatarFallback>{u.displayName?.[0] || 'U'}</AvatarFallback>
                 </Avatar>
               </TooltipTrigger>
               <TooltipContent>
-                <p>{c}</p>
+                <p>{u.displayName}</p>
               </TooltipContent>
             </Tooltip>
           ))}

@@ -1,6 +1,6 @@
 import { QueryClient } from "@tanstack/react-query";
 
-import { PostDB, PostDetails } from "@/types/post";
+import { PostActivityDB, PostDB, PostDetails } from "@/types/post";
 
 export function updatePostInCache(queryClient: QueryClient, updatedPost: PostDB) {
   queryClient.setQueryData(["post-details", updatedPost.$id], (old: PostDetails | undefined) => {
@@ -26,4 +26,19 @@ export function updatePostInCache(queryClient: QueryClient, updatedPost: PostDB)
       $updatedAt: updatedPost.$updatedAt,
     };
   });
+}
+
+export function udpatePostActivityInCache(queryClient: QueryClient, updatedActivity: PostActivityDB) {
+  queryClient.setQueryData(["post-activity", updatedActivity.$id], (old: PostActivityDB | undefined) => {
+    if (!old) {
+      return {
+        presence: updatedActivity.presence
+      }
+    }
+
+    return {
+      ...old,
+      presence: updatedActivity.presence
+    }
+  })
 }

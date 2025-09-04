@@ -50,3 +50,14 @@ export const POST_CATEGORIES: PostCategory[] = ["Tech", "Life", "Food", "Health"
 export type CreatePostResult = {
   $id: string;
 };
+
+export interface PostActivityDB extends Models.Row {
+  $id: string,
+  presence: string
+}
+
+export interface PostUserActivity {
+  userId: string,
+  displayName: string
+  lastActive: string
+}
