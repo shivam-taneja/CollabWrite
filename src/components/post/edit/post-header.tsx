@@ -1,23 +1,29 @@
 'use client';
 
 import { useState } from 'react';
-
 import { Controller, UseFormReturn } from 'react-hook-form';
 
 import { UpdatePostSchemaT } from '@/schema/post';
-
-import { PostCategory, PostDetails } from '@/types/post';
+import { POST_CATEGORIES, PostCategory, PostDetails } from '@/types/post';
 
 import DeletePostModal from '../delete-post-modal';
 import PostSettingsModal from '../post-settings-modal';
 
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { MoreVertical, Save, Settings, Trash } from 'lucide-react';
+import { MoreVertical, Save, Settings, Tag, Trash } from 'lucide-react';
 
 interface Props {
   form: UseFormReturn<UpdatePostSchemaT>;
@@ -31,13 +37,27 @@ interface Props {
   isOwner: boolean;
 }
 
-const EditPostHeader = ({ form, category, collaborators, isPrivate, postId, onSave, isSaving, isDirty, isOwner, }: Props) => {
-  const { control, handleSubmit } = form;
+const EditPostHeader = ({
+  form,
+  category,
+  collaborators,
+  isPrivate,
+  postId,
+  onSave,
+  isSaving,
+  isDirty,
+  isOwner,
+}: Props) => {
+  const { control, handleSubmit, setValue, watch } = form;
 
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
 
-  // TODO: add option to update category
+  const currentCategory = watch('category') as PostCategory | undefined;
+  if (!currentCategory && category) {
+    setValue('category', category, { shouldDirty: false });
+  }
+
   return (
     <>
       <form
@@ -45,6 +65,39 @@ const EditPostHeader = ({ form, category, collaborators, isPrivate, postId, onSa
         className="z-20 bg-card border-b px-6 pb-2 flex justify-between items-start [@media(min-width:480px)]:items-start [@media(min-width:480px)]:flex-row flex-col gap-2"
       >
         <div className="flex flex-col gap-2 w-full [@media(min-width:480px)]:w-auto">
+
+          <div className="flex items-center gap-2">
+            <Badge variant="secondary" className="rounded-full">
+              <Tag className="mr-1 h-3 w-3" />
+
+              {currentCategory ?? category}
+            </Badge>
+
+            <Controller
+              name="category"
+              control={control}
+              rules={{ required: true }}
+              render={({ field }) => (
+                <Select
+                  disabled={isSaving}
+                  value={field.value}
+                  onValueChange={(val) => {
+                    field.onChange(val as PostCategory);
+                  }}
+                >
+                  <SelectTrigger className="h-8 w-[160px] cursor-pointer">
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent className='bg-white'>
+                    {POST_CATEGORIES.map((c) => (
+                      <SelectItem key={c} value={c} className='cursor-pointer'>{c}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+          </div>
+
           <Controller
             name="title"
             control={control}
@@ -100,7 +153,7 @@ const EditPostHeader = ({ form, category, collaborators, isPrivate, postId, onSa
 
               <DropdownMenuContent align="end" className="bg-white">
                 <DropdownMenuItem
-                  onClick={(e) => setSettingsOpen(true)}
+                  onClick={() => setSettingsOpen(true)}
                   className="cursor-pointer"
                 >
                   <Settings className="mr-2 h-4 w-4" /> Update Settings
@@ -108,7 +161,7 @@ const EditPostHeader = ({ form, category, collaborators, isPrivate, postId, onSa
 
                 <DropdownMenuItem
                   variant="destructive"
-                  onClick={(e) => setDeleteOpen(true)}
+                  onClick={() => setDeleteOpen(true)}
                   className="cursor-pointer"
                 >
                   <Trash className="mr-2 h-4 w-4" /> Delete Post
