@@ -11,7 +11,6 @@ import { useUpdatePostPrivacy } from "@/hooks/api/post/useUpdatePostPrivacy";
 import { addPostCollaboratorSchema, AddPostCollaboratorSchemaT } from "@/schema/post";
 
 import { PostCollaboratorsEditorDetails } from "@/types/post";
-import { UserPostsSection } from "@/types/user";
 
 import RemovePostCollaboratorAlert from "./remove-post-collaborator-alert";
 import StopPostSharingAlert from "./stop-post-sharing-alert";
@@ -40,18 +39,20 @@ import { toast } from "react-toastify";
 const PostSettingsModal = ({
   isOpen,
   onOpenChange,
-  post,
+  postId,
+  isPrivate
 }: {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  post: UserPostsSection["posts"][0];
+  postId: string;
+  isPrivate: boolean
 }) => {
   const [isShared, setIsShared] = useState(false);
   const [stopPostSharingConfirmOpen, setStopPostSharingConfirmOpen] = useState(false);
   const [collaboratorToRemove, setCollaboratorToRemove] = useState<PostCollaboratorsEditorDetails | null>(null);
 
   const { data: collaborators, isLoading, isFetching } = useGetCollaborators({
-    postId: post.$id,
+    postId,
     queryOptions: { enabled: isOpen },
   });
   const {
@@ -65,7 +66,7 @@ const PostSettingsModal = ({
 
   const form = useForm<AddPostCollaboratorSchemaT>({
     resolver: zodResolver(addPostCollaboratorSchema),
-    defaultValues: { email: "", postId: post.$id },
+    defaultValues: { email: "", postId: postId },
     mode: 'all'
   });
 
@@ -84,7 +85,7 @@ const PostSettingsModal = ({
   const handlePrivateToggle = async (checked: boolean) => {
     try {
       await updatePostPrivacy({
-        postId: post.$id,
+        postId: postId,
         privacySetting: checked
       })
     } catch (err) {
@@ -143,7 +144,7 @@ const PostSettingsModal = ({
                   <Label htmlFor="private">Private</Label>
                   <Switch
                     id="private"
-                    checked={post.isPrivate}
+                    checked={isPrivate}
                     onCheckedChange={handlePrivateToggle}
                     className="cursor-pointer"
                     disabled={waitForActionsToComplete}
@@ -266,14 +267,14 @@ const PostSettingsModal = ({
 
       <RemovePostCollaboratorAlert
         collaboratorToRemove={collaboratorToRemove}
-        postId={post.$id}
+        postId={postId}
         setCollaboratorToRemove={setCollaboratorToRemove}
       />
 
       <StopPostSharingAlert
         open={stopPostSharingConfirmOpen}
         onOpenChange={setStopPostSharingConfirmOpen}
-        postId={post.$id}
+        postId={postId}
       />
     </>
   );

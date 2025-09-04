@@ -23,7 +23,9 @@ export async function GET(
 
     let post: PostDB;
     try {
-      post = await tables.getRow<PostDB>(db.dbID, db.posts, id);
+      post = await tables.getRow<PostDB>(db.dbID, db.posts, id, [
+        Query.select(["$id", "title", "content", "summary", "category", "$createdAt", "$updatedAt", "isPrivate"])
+      ]);
     } catch (err) {
       if (err instanceof AppwriteException && err.code === 404) {
         return notFound("Post not found")
@@ -89,6 +91,7 @@ export async function GET(
       category: post.category,
       $createdAt: post.$createdAt,
       $updatedAt: post.$updatedAt,
+      isPrivate: post.isPrivate,
       postCollaborators: {
         owner: ownerName,
         collaborators: editorNames,

@@ -21,11 +21,14 @@ const EditPostPage = ({ post }: { post: PostDetails }) => {
       <Card className="flex-1 flex flex-col border bg-card shadow-md h-[80vh] gap-1 py-4">
         <EditPostHeader
           form={form}
+          postId={post.$id}
+          isPrivate={post.isPrivate}
           category={post.category}
           collaborators={post.postCollaborators.collaborators}
           onSave={onSubmit}
           isSaving={isSaving}
           isDirty={isDirty}
+          isOwner={post.permissions.canUpdate}
         />
 
         {editor &&

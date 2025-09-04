@@ -33,7 +33,7 @@ export interface PostPermissions {
 }
 
 export interface PostDetails
-  extends Pick<PostDB, "$id" | "title" | "content" | "summary" | "category" | '$createdAt' | '$updatedAt'> {
+  extends Pick<PostDB, "$id" | "title" | "content" | "summary" | "category" | '$createdAt' | '$updatedAt' | 'isPrivate'> {
   postCollaborators: {
     owner: string;
     collaborators: string[];

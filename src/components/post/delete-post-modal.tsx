@@ -1,7 +1,6 @@
 'use client';
 
 import { useDeletePost } from "@/hooks/api/post/useDeletePost";
-import { UserPostsSection } from "@/types/user";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -17,17 +16,17 @@ import { toast } from "react-toastify";
 const DeletePostModal = ({
   isOpen,
   onOpenChange,
-  post,
+  postId,
 }: {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  post: UserPostsSection['posts'][0];
+  postId: string;
 }) => {
   const { mutateAsync, isPending } = useDeletePost();
 
   async function onDelete() {
     try {
-      await mutateAsync({ postId: post.$id });
+      await mutateAsync({ postId });
       toast.success("Post deleted successfully!");
     } catch (err) {
       toast.error("Something went wrong!");

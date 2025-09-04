@@ -74,7 +74,7 @@ const UserPostCard = ({
           </>
         )}
       </DropdownMenuContent>
-    </DropdownMenu >
+    </DropdownMenu>
   );
 
   const footerExtras = (
@@ -102,8 +102,8 @@ const UserPostCard = ({
       />
 
       <UpdatePostModal isOpen={editOpen} onOpenChange={setEditOpen} post={postDetails} />
-      <DeletePostModal isOpen={deleteOpen} onOpenChange={setDeleteOpen} post={postDetails} />
-      <PostSettingsModal isOpen={settingsOpen} onOpenChange={setSettingsOpen} post={postDetails} />
+      <DeletePostModal isOpen={deleteOpen} onOpenChange={setDeleteOpen} postId={postDetails.$id} />
+      <PostSettingsModal isOpen={settingsOpen} onOpenChange={setSettingsOpen} postId={postDetails.$id} isPrivate={postDetails.isPrivate} />
     </>
   );
 };

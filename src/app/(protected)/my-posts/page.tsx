@@ -54,7 +54,7 @@ const MyPostsPage = () => {
 
                   {myPosts.owner.total === 0 ? (
                     <p className="text-muted-foreground text-sm">
-                      You don’t own any posts yet. Start creating one!
+                      You don&apos;t own any posts yet. Start creating one!
                     </p>
                   ) : (
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">

@@ -6,7 +6,7 @@ import { useAuthActions } from "@/core/auth";
 import { UpdatePostSchemaT } from "@/schema/post";
 
 import { ApiResponse } from "@/core/api/types";
-import { UserPost } from "@/types/user";
+import { PostDB } from "@/types/post";
 
 export function useUpdatePost() {
   const queryClient = useQueryClient()
@@ -17,7 +17,7 @@ export function useUpdatePost() {
     mutationFn: async ({ postId, ...updatedData }) => {
       const jwt = await getValidJwt();
 
-      const response = await api.patch<ApiResponse<UserPost>>({
+      const response = await api.patch<ApiResponse<PostDB>>({
         entity: `post/${postId}`,
         data: updatedData,
         options: {
@@ -34,5 +34,5 @@ export function useUpdatePost() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["user-posts"] });
     }
-  }) as UseMutationResult<ApiResponse<UserPost>, Error, UpdatePostSchemaT>;
+  }) as UseMutationResult<ApiResponse<PostDB>, Error, UpdatePostSchemaT>;
 }

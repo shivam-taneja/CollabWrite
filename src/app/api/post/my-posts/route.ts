@@ -6,7 +6,8 @@ import { jsonOk, serverError } from "@/lib/api-responses";
 import { requireUser } from "@/lib/auth";
 import db from "@/lib/db";
 
-import { UserPost, UserPostsSection } from "@/types/user";
+import { PostDB } from "@/types/post";
+import { UserPostsSection } from "@/types/user";
 
 export async function GET(req: NextRequest) {
   try {
@@ -33,7 +34,7 @@ export async function GET(req: NextRequest) {
 
       const total = postIds.length;
 
-      const posts = await tables.listRows<UserPost>(db.dbID, db.posts, [
+      const posts = await tables.listRows<PostDB>(db.dbID, db.posts, [
         Query.equal("$id", postIds),
         Query.select(["$id", "title", "summary", "category", "$createdAt", "isPrivate"]),
       ]);
