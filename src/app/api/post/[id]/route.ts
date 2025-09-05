@@ -149,12 +149,11 @@ export async function PATCH(req: NextRequest, context: { params: Promise<{ id: s
   }
 }
 
-export async function DELETE(req: NextRequest) {
+export async function DELETE(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
-    const { searchParams } = new URL(req.url);
-    const searchParamsPostId = searchParams.get("postId");
+    const { id } = await context.params;
 
-    const parsed = deletePostSchema.safeParse({ postId: searchParamsPostId });
+    const parsed = deletePostSchema.safeParse({ postId: id });
     if (!parsed.success) {
       return jsonError(parsed.error.message)
     }
